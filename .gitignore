@@ -1,0 +1,14 @@
+# Sanal ortam
+backend/venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Ortak ignore
+*.log
+.env
+.DS_Store
+
+# Node.js için (frontend tarafı için)
+frontend/node_modules/
