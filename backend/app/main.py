@@ -9,7 +9,7 @@ from .database import Base, engine
 from . import models
 #kendi projenin modelinde bulunan tabloları bu sayfaya tanıtır.
 
-from .routers import company_router
+from .routers import company_router,user_router
 #company routerını main sayfamıza tantıyıoruz.
 
 app = FastAPI()
@@ -17,6 +17,7 @@ app = FastAPI()
 
 ###
 app.include_router(company_router.router)
+app.include_router(user_router.router)
 
 
 Base.metadata.create_all(bind=engine)
