@@ -40,7 +40,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)): # kullanıcı 
     return new_user #modelin son halini geriye döndürüyoruz.
 
 #kullancilari getirme
-@router.get("/", response_model=list[UserOut])
-def get_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
+@router.get("/", response_model=list[UserOut]) #gelecek kayıtların nasıl geceleğini response_model ile seçiyoruz. yani gelen kayıtta hangi veriler gözükecek bunu belirliyoruz. Bunlar UserOut classında verilen değişkenlerin şeklinde gelecekler. ve gelen veriler liste türünde olacak çünkü bir çok kayıt(satır) gelebilir.
+def get_users(db: Session = Depends(get_db)): #get_users fonksiyonumuzda ise 1 adet parametre var bu da db. db adlı parametre session veri türünde olacak ve depends sayesinde get_db bağımlılık fonksiyonunu çağırıyoruz. depends kullandık çünkü get_db çağırıldığıında geriye db nesnesini (oturum nesnesi) döndürüyor ve bu fonksiyon tamamlandığında finally: çalışıp veritabanı bağlantısını (oturumunu) kapatıyor.
+    return db.query(User).all() #User tablosundaki tüm kayıtları(satırları) getirir. ve UserOut da bulunan alanları doldurup sadece o alanları her kullanıcıya göre liste şeklinde geri döndürür.
 
