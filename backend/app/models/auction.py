@@ -16,7 +16,7 @@ class Auction(Base):
  is_active=Column(Boolean,default=True)
 
  #ilişkiler
- product=relationship("Product",back_populates="auciton")
+ product=relationship("Product",back_populates="auction")
  bids=relationship("Bid",back_populates="auction",cascade="all,delete")
 
 

@@ -4,13 +4,20 @@ from fastapi import FastAPI
 #Bu satır, FastAPI framework’ünden FastAPI sınıfını projene dahil eder.
   
 from .database import Base, engine
-#Bu satır, kendi projenin içindeki database.py dosyasından iki önemli değişkeni import eder.
+# projenin içindeki database.py dosyasından base ve engine adlı 2 değişkeni import eder.
 
 from . import models
-#Bu satır, kendi projenin modelsinde bulunan tabloları bu sayfaya tanıtır.
+#kendi projenin modelinde bulunan tabloları bu sayfaya tanıtır.
+
+from .routers import company_router
+#company routerını main sayfamıza tantıyıoruz.
 
 app = FastAPI()
 #Uygulamayı başlatır ve FastAPI classından app adında bir nesne oluşturur. Bundan sonra app.get() app.post() gibi tüm rotaları bu nesne üzerinden oluştururuz.
+
+###
+app.include_router(company_router.router)
+
 
 Base.metadata.create_all(bind=engine)
 #SqlAlchemy ye diyor ki : Base'ten türetilmiş tüm sınıflara bak, ve bunların veritabanındaki tablolarını oluştur.

@@ -14,5 +14,5 @@ class User(Base):
     #İlişkiler
     company=relationship("Company",back_populates="users")
     role=relationship("Role",back_populates="users")
-    bids=relationship("Bid",back_populates="users", cascade="all, delete")
+    bids = relationship("Bid", back_populates="supplier", cascade="all, delete")
 

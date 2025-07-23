@@ -1,3 +1,5 @@
+#database ayarlarının olduğu bölüm
+
 from sqlalchemy import create_engine
 #sqlalchemy kütüphanesinden create_engine fonksiyonunu kullanmamızı sağlar.
 from sqlalchemy.ext.declarative import declarative_base

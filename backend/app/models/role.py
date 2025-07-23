@@ -8,4 +8,4 @@ class Role(Base):
     name=Column(String(100))
 
     #ilişkiler
-    user=relationship("User",back_populates="roles")
+    users = relationship("User", back_populates="role")
