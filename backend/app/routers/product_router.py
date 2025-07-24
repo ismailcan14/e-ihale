@@ -20,7 +20,7 @@ def get_db():
 def create_product(product:ProductCreate,db:Session=Depends(get_db)):
     #2 adet parametre alıyor birincisi product ve ProductCreate türünde formdan gelen verileri bu şablona doldurucağız. db ile de veritabanı bağlantısın açıyoruz.
     new_product = Product(**product.model_dump())  
- #product bir pydantic sözlüğüdür yani bir ProductCreate dir. product.dict() ile onu bir  python sözlüğüne çeviririz. python sözlüğü anahtar ve değer çiftlerinden oluşan bir veri tipidir. Json formatına çok benziyor.
+ #product bir pydantic sözlüğüdür yani bir ProductCreate dir. product.dict() i model_dump() ile değiştirdik ikiside aynı işlevi görüyor ancak pydantic v1 de dict() kullanılırken pydantic v2 de model_dump() kullanılır işlevi ise product nesnesini bir  python sözlüğüne çevirir. python sözlüğü, anahtar ve değer çiftlerinden oluşan bir veri tipidir. Json formatına çok benziyor.
     # ** ile de product.dict te bulunan değerleri Product modeline aktarırız. Aynı biçimde olan anahtarlara karşılıkları yazılır. bunu da new_product adlı Product nesnesi üzerinde tutarız. (Constructorlı bir sınıfa nesne oluşturur gibi.)
     db.add(new_product) #bu nesneyi veritabanına eklemek üzere hazır hale getirir 
     db.commit() #commit ile veritabanına gerçek olarak kaydı ekleriz
