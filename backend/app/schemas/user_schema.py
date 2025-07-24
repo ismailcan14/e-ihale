@@ -15,4 +15,4 @@ class UserOut(BaseModel):
     role_id:int
 
     class Config:
-        orm_mode=True
+        form_attributes=True
