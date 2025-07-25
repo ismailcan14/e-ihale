@@ -12,6 +12,9 @@ from . import models
 from .routers import company_router,user_router,product_router,auction_router,bid_router
 #company routerını main sayfamıza tantıyıoruz.
 
+from fastapi.middleware.cors import CORSMiddleware
+#Cors ayarları için gerekli kütüphaneyi import ediyoruz
+
 app = FastAPI()
 #Uygulamayı başlatır ve FastAPI classından app adında bir nesne oluşturur. Bundan sonra app.get() app.post() gibi tüm rotaları bu nesne üzerinden oluştururuz.
 
@@ -27,6 +30,15 @@ Base.metadata.create_all(bind=engine)
 #SqlAlchemy ye diyor ki : Base'ten türetilmiş tüm sınıflara bak, ve bunların veritabanındaki tablolarını oluştur.
 #Base : tüm model sınıflarının(user, role..) türediği temel sınıftır
 #bind=engine: Hangi veritabanına bağlantı kuracağını belirtir (engine, veritabanı bağlantısı).
+
+# CORS ayarları
+app.add_middleware(
+    CORSMiddleware,  # type: ignore
+    allow_origins=["http://localhost:3000"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+) #Frontend den her giriş yaptığımda sunucuya bağlanamadı hatası alıyordum. Cors ayarlarını yaptıktan sonra bu sorun çözüldü.
 
 @app.get("/")
 def read_root():

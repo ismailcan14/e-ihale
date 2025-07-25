@@ -92,3 +92,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
     return user # kullanıcı geri döndürülür.
 
+#Giriş yapan kullanıcıyı döndüren endpoint
+@router.get("/me", response_model=UserOut)
+def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user
+

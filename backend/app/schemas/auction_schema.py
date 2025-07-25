@@ -5,7 +5,7 @@ from typing import Optional
 class AuctionCreate(BaseModel):
     product_id:int
     end_time:datetime
-    starting_price=float
+    starting_price:float
     
 class AuctionOut(BaseModel):
     id:int
@@ -17,4 +17,4 @@ class AuctionOut(BaseModel):
     is_active:bool
 
     class Config:
-       orm_mode=True
+       form_attributes=True
