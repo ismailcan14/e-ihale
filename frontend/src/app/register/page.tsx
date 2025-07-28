@@ -54,8 +54,6 @@ export default function RegisterCompanyPage() {
       //eğer try da bir hata oluşursa catch bloğu çalışır ve hata mesajı döndürürüz.
     }
   };
-  // Submit butonuna basıldığında handleSubmit fonksiyonu çalışır. bu fonksiyon asenkron bir fonksiyondur yani örnek olarak bir istek atıldığında cevabı beklemeden fonksiyon çalışmaya devam eder. e.preventDefault() fonksiyonu ile butona basılmasına rağmen sayfa yenilenmesi engellenir. 
-   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-[#1561ad] via-[#1c77ac] to-[#1dbab4] p-4">
       <div className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-lg flex flex-col items-center gap-6">

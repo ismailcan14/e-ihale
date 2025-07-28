@@ -52,9 +52,13 @@ export default function LoginPage() {
           },
         });
         //Burada id ye göre şirketler tablosuna bir istekte bulunuluyor yine token ile beraber.
-
+ 
         const companyData = await companyRes.json(); // Gelen istek json formatına çevrilip companyData adlı değişkene aktarılıyor. burada şirket verileri var. 
-
+        if (!companyRes.ok) {
+  console.error("Şirket bilgisi alınamadı", await companyRes.text());
+  return;
+}
+       console.log(companyData.type)
         if (companyData.type === "customer") {
           router.push("/customer");
         } else if (companyData.type === "supplier") {

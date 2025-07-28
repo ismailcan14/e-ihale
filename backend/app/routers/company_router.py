@@ -7,6 +7,7 @@ from app.schemas.company_schema import CompanyCreate,CompanyOut
 from app.utils import hash_password
 from app.models.role import Role
 from fastapi import HTTPException, status
+from app.routers.user_router import get_current_user
 
 
 
@@ -56,3 +57,27 @@ def create_company(company_data: CompanyCreate, db: Session = Depends(get_db)):
     db.commit()
 
     return company
+
+#id ye göre şirket bilgisi
+@router.get("/{company_id}", response_model=CompanyOut)
+#companies/3 gibi isteklerin tanımıdır. response_model ise schema da oluşturdugumuz companyOut sınıfına göre verilerin geri döneceğini açıklar.
+def get_company(
+    company_id: int, #1. parametre olarak bir id alır türü int dır.
+
+    db: Session = Depends(get_db), #2. parametre db adlı bir Session(oturum) nesnesidir. burada get_db fonksiyonunu çağırırken Depends i kullanırız. Çünkü get_db normal bir fonksiyon değil bir generator fonksiyon. Yani biz direkt db:session =get_db() dersek get_db de bir return yok geriye bir değer döndüremez. Ama Depends ile çağırınca yield e kadar gelir ve db yi döndürür. Fonksiyonun sonuna gelince ise finally çalışır ve veritabanı kapatılır.
+
+    current_user: User = Depends(get_current_user) #3. parametre olarak current_user adlı ve User sınıfı türünde bir nesnedir. Depends(get_current_user) fonksiyonu çağırır. get_current_user Fonksiyonu user_router da tanımlanan ve tokende bulunan kullanıcı bilgilerini çözümleyip bize çözümlenen  user_id user_name gibi verileri user adlı nesne de geri döndüren bir fonksiyondur.
+    # Peki neden yine depends() kullandık ? Çünkü get_current_user() fonksiyonu token gibi veritabanı session gibi parametreler alıyor ancak depends kullanınca bu parametreleri vermeden direkt fonksiyonu çağırabiliyoruz. FastApi tüm bu işleri bizim için kendi yapıyor.
+):
+    # Şirket var mı?
+    company = db.query(Company).filter(Company.id == company_id).first() 
+    #Company modelinde bir sorgu hazırlanır. bu sorgu aslında şudur : select * from company where id = company_id bu sorgudan çıkan ilk kaydı bize geri döndürür ve company adlı nesneye atılır.
+    if not company: #eğer şirket yoksa
+        raise HTTPException(status_code=404, detail="Şirket bulunamadı")
+    #şirket yoksa python da hata fırlatmak için kullanılan anahtar kelime "RAİSE" ile 404(Not Found-Şirket Bulunamadı) hatası yollanır.
+    
+    # Kullanıcı sadece kendi şirket bilgilerine ulaşabilir
+    if current_user.company_id != company_id:
+        raise HTTPException(status_code=403, detail="Bu şirkete erişme yetkiniz yok")
+    #Şirket var ancak tokenda bulunan userın şirket id si ile bulunan kayıttaki şirketin idsi eşleşmediği için erişim izni vermiyoruz.
+    return company # her şey tamam ise şirketin verileri geri döndürülüyor.
