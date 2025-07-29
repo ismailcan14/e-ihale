@@ -38,7 +38,7 @@ export default function CustomerSidebar({ userRole }: CustomerSidebarProps) {
           key={item.path}
           href={item.path}
           className={`block px-4 py-2 rounded font-medium ${
-            pathname === item.path
+            pathname === item.path 
               ? "bg-blue-600 text-white"
               : "hover:bg-blue-100 text-gray-800"
           }`}

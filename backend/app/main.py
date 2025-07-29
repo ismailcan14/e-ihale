@@ -15,6 +15,9 @@ from .routers import company_router,user_router,product_router,auction_router,bi
 from fastapi.middleware.cors import CORSMiddleware
 #Cors ayarları için gerekli kütüphaneyi import ediyoruz
 
+from app.scheduler import start as start_scheduler
+#APScheduler in dosyasını main.py ye dahil ediyoruz.
+
 app = FastAPI()
 #Uygulamayı başlatır ve FastAPI classından app adında bir nesne oluşturur. Bundan sonra app.get() app.post() gibi tüm rotaları bu nesne üzerinden oluştururuz.
 
@@ -44,3 +47,5 @@ app.add_middleware(
 def read_root():
     return {"message": "E-ihale API çalışıyor!"}
 #Ana sayfaya (/) GET isteği geldiğinde çalışacak olan fonksiyonu tanımlar.
+
+start_scheduler() #scheduleri baslatıyoruz
