@@ -46,11 +46,38 @@ export default function DashboardPage() {
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Profil Bilgileri</h2>
-      <p className="mb-2"><span className="font-medium text-gray-700">Ad:</span> {user.name}</p>
-      <p className="mb-2"><span className="font-medium text-gray-700">Email:</span> {user.email}</p>
-      <p className="mb-2"><span className="font-medium text-gray-700">Şirket ID:</span> {user.company_id}</p>
-      <p className="mb-2"><span className="font-medium text-gray-700">Rol:</span> {user.role_id === 1 ? "Admin" : "Müşteri"}</p>
-      <p className="mb-2"><span className="font-medium text-gray-700">Şirket Tipi:</span> {company?.type}</p>
+<p className="mb-2">
+  <span className="font-semibold text-black">Ad:</span> <span className="text-black">{user.name}</span>
+</p>
+<p className="mb-2">
+  <span className="font-semibold text-black">Email:</span> <span className="text-black">{user.email}</span>
+</p>
+<p className="mb-2">
+  <span className="font-semibold text-black">Şirket ID:</span> <span className="text-black">{user.company_id}</span>
+</p>
+<p className="mb-2">
+  <span className="font-semibold text-black">Rol:</span>{" "}
+  <span className="text-black">
+    {user.role_id === 1
+      ? "Admin"
+      : user.role_id === 2
+      ? "Müdür"
+      : user.role_id === 3
+      ? "Personel"
+      : "Bilinmeyen Rol"}
+  </span>
+</p>
+<p className="mb-2">
+  <span className="font-semibold text-black">Şirket Tipi:</span>{" "}
+  <span className="text-black">
+    {company?.type === "customer"
+      ? "Müşteri"
+      : company?.type === "supplier"
+      ? "Tedarikçi"
+      : "Bilinmeyen"}
+  </span>
+</p>
+
     </div>
   );
 }

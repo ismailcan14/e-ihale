@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app.schemas.user_schema import UserCreate, UserOut
+from app.schemas.user_schema import UserCreate, UserOut, UserRegisterCreate
 from app.database import SessionLocal
 from app.models.user import User
 from app.utils import ALGORITHM, SECRET_KEY, create_access_token, hash_password, verify_password
@@ -22,8 +22,8 @@ def get_db(): #Detaylı anlatım company_routerda
         db.close() 
 
 #kullanıcı kayit
-@router.post("/", response_model=UserOut) #Burada bulunan response_model, gelen istek başarıyla gerçekleştiğinde dönen cevvabın yapısını ifade eder.
-def create_user(user: UserCreate, db: Session = Depends(get_db)): # kullanıcı kayıt fonksiyonumuzu yazıyoruz. bu fonksiyonumuz 2 adet parametre alıyor birincisi user nesnesi userCreate(schemada oluşturduğumuz) türünde ve ileride frontendden şimdi ise swaggerdan yolladığımız verilerin fonksiyon içinde doldurulduğu parametre. Yani frontda formda verileri doldurduğumuzda ve bu apiye istek attığımızda veriler UserCreate modeline göre gelmeli ve isimleri uyuşmalı.!!!
+@router.post("/register", response_model=UserOut) #Burada bulunan response_model, gelen istek başarıyla gerçekleştiğinde dönen cevvabın yapısını ifade eder.
+def create_user(user: UserRegisterCreate, db: Session = Depends(get_db)): # kullanıcı kayıt fonksiyonumuzu yazıyoruz. bu fonksiyonumuz 2 adet parametre alıyor birincisi user nesnesi userCreate(schemada oluşturduğumuz) türünde ve ileride frontendden şimdi ise swaggerdan yolladığımız verilerin fonksiyon içinde doldurulduğu parametre. Yani frontda formda verileri doldurduğumuzda ve bu apiye istek attığımızda veriler UserCreate modeline göre gelmeli ve isimleri uyuşmalı.!!!
 
     existing_user = db.query(User).filter(User.email == user.email).first() # veritabanına bir sorgu atıyoruz. bu sorgu formdan gelen email veritabanında var mı ? varsa ilk kaydı döndür demek ve cevap existing_user adlı değişkende tutuluyor.
     if existing_user:
@@ -97,3 +97,35 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
 
+#KULLANICI EKLEME
+@router.post("/add-user", response_model=UserOut) #dönüş değeri olarak UserOut şablonu örnek alınacak. yani UserOut da hangi değerler varsa sadece o değerler döndürülecek.
+def add_user(
+    user: UserCreate, #Frontendden gelen form verisini temsil eder. UserCreate sınıfı ile form verileri uyuşmalıdır..
+    db: Session = Depends(get_db), #Depend fonksiyonu ile get_db çağırılır ve veritabanı bağlantısı fonksiyon çalışana kadar açık kalır.
+    current_user: User = Depends(get_current_user) #Depend fonksiyonu ile get_current_user fonksiyonunu çağırıyoruz get_current_user fonksiyonu bize giriş yapan kullanıcının tokenını doğruluyor ve giriş yapan kullanıcının bilgilerini bize ulaştırıyor. Bu sayede role, şirket id si gibi bilgilere ulaşabiliyoruz.
+): 
+
+    if current_user.role.name != "admin":
+        raise HTTPException(status_code=403, detail="Sadece admin kullanıcılar kullanıcı ekleyebilir") 
+    #Gelen role bilgisi admin değil ise hata mesajı döndürme
+
+    existing_user = db.query(User).filter(User.email == user.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email zaten kayıtlı")
+    #kayıtta kullanılan email zaten varsa hata mesajı döndürme
+
+    new_user = User(
+        name=user.name,
+        email=user.email,
+        password=hash_password(user.password),
+        role_id=user.role_id,
+        company_id=current_user.company_id 
+    ) 
+    #Bir User nesnesi oluşturup formdan gelen verileri bu nesneye doldurma
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    #veritabanına eklemeye hazır hale gitirip commit ile gerçek olarak ekleme ve refresh ile get_time id gibi sonradan gelen verileri new_user nesnemize atıp bu nesneyi geri döndürüyoruz.
+
+    return new_user

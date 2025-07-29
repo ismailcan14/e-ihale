@@ -1,4 +1,5 @@
 'use client'
+//Bu dosyanın bir Client Component olduğunu belirtir. Çünkü usePathname gibi React hook'ları sadece client bileşenlerde kullanılabilir.
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";

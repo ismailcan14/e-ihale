@@ -1,18 +1,28 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
+##İlk kayıtta
+class UserRegisterCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    company_id: int
+    role_id: int
+
+
+#Çalışan eklerken
 class UserCreate(BaseModel):
-    name:str
-    email:str
-    password:str
-    company_id:int
-    role_id:int
+    name: str
+    email: EmailStr
+    password: str
+    role_id: int
+
 
 class UserOut(BaseModel):
-    id:int
-    name:str
-    email:str
-    company_id:int
-    role_id:int
+    id: int
+    name: str
+    email: EmailStr
+    company_id: int
+    role_id: int
 
     class Config:
-        form_attributes=True
+        orm_mode = True 
