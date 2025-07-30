@@ -65,15 +65,20 @@ def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db),cu
     db.refresh(auction)
     return auction
 
-@router.get("/my", response_model=list[AuctionOut])
+#Tüm İhaleleri Getirme
+@router.get("/my", response_model=list[AuctionOut]) #bir get endpointi oluşturuyoruz ve bu endpointe istek geldiğinde dönecek veri modelinin auctionOut şeklinde olduğunu ve bir liste şeklinde olduğunu belirtiyoruz.
 def get_my_auctions(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user) #fonksiyonumuzu oluşturup db parametresi ile veritabanı bağlantısını fonksiyon kullanıldıkça otomatik açık kapatacak şekilde Depends fonksiyonu ile get_db fonksiyonunu çağırarak yapıyoruz.
+    #current_user ise User sınıfı türünde bir nesne ve giriş yapan kullanıcının bilgilerini tutuyor.
 ):
     auctions = db.query(Auction)\
         .filter(Auction.company_id == current_user.company_id)\
         .options(joinedload(Auction.product))\
-        .all()
+        .all() #Burada Auction modeline bir sorgu yazıyoruz sorguda auction tablosundaki company_id ile giriş yapan kullanıcının company id si eşleşen kayıtların ilişkili olduğu Product tablosundaki kayıtların tümünü alıyoruz ve bu kayıtlar auction nesnesinde tutuluyor. K
     return auctions
+#Kayıt geri döndürülürken de auctionOut modeline göre eşleşen veriler AuctionOut modeline dolduruluyor ve geri döndürülüyor. AuctionsOut modeline  "product: Optional[ProductOut]" eklemiştik. bu kısmıda ürün bilgilerini auctionOut modeline atabilmek  için yaptık.
+
+
 
 
