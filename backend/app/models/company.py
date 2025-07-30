@@ -12,3 +12,5 @@ class Company(Base):
     #ilişkiler
     users=relationship("User",back_populates="company")
     products=relationship("Product",back_populates="company")
+    auctions = relationship("Auction", back_populates="company")
+

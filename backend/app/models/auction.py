@@ -9,6 +9,7 @@ class Auction(Base):
 
  id=Column(Integer,primary_key=True,index=True)
  product_id=Column(Integer,ForeignKey("products.id"))
+ company_id = Column(Integer, ForeignKey("companies.id")) #şirket id sonradan eklendi *
  winner_id = Column(Integer, ForeignKey("users.id"), nullable=True) #Kazananı belirlemek için oluşturuldu.
  auction_type = Column(String, default="highest")  # ihale veya açık arttırma
  start_time=Column(DateTime,default=datetime.utcnow)
@@ -20,6 +21,7 @@ class Auction(Base):
  #ilişkiler
  product=relationship("Product",back_populates="auction")
  bids=relationship("Bid",back_populates="auction",cascade="all,delete")
+ company = relationship("Company", back_populates="auctions")
 
 
 

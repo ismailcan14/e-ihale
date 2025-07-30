@@ -14,4 +14,4 @@ class BidOut(BaseModel):
     timestamp:datetime
 
     class Config:
-        form_attributes=True
+        orm_mode = True

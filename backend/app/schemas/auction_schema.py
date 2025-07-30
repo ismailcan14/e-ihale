@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, Literal
 
+from app.schemas.product_schema import ProductOut
+
 class AuctionCreate(BaseModel):
     product_id: int
     start_time: Optional[datetime] = None
@@ -18,6 +20,7 @@ class AuctionOut(BaseModel):
     current_price: Optional[float]
     is_active: bool
     auction_type: str
+    product: Optional[ProductOut] #ihalelein ürün adlarını gösterebilmek için yaptık*
 
     class Config:
-        form_attributes = True
+        orm_mode = True

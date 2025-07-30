@@ -1,11 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
+from sqlalchemy.orm import joinedload
+
 
 from app.database import SessionLocal
 from app.models.auction import Auction
 from app.models.product import Product
 from app.schemas.auction_schema import AuctionCreate, AuctionOut
+from app.models.user import User
+from app.routers.user_router import get_current_user
 
 router=APIRouter(
     prefix="/auctions",
@@ -23,7 +27,7 @@ def get_db():
 #İhale Oluşturma
 @router.post("/", response_model=AuctionOut) 
 #response_model ile istek sonrası dönen kayıtta hangi veriler tutulacak onu AuctionOut da belirliyoruz. kısaca istediğimiz verileri geriye döndürüyoruz.
-def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db)):
+def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
     #gelen veriler AuctionCreate modeline göre bekleniyor ve auction_data da tutuluyor. db ile veritabanı oturumunu başlatıyoruz.
     product = db.query(Product).filter(Product.id == auction_data.product_id).first()
     #product adında bir değişken oluşturup Product tablosunda gelen ürünün id sinde bir ürün varmı diye kontrol ediyoruz
@@ -48,6 +52,7 @@ def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db)):
 
     auction = Auction(
         product_id=auction_data.product_id,
+        company_id=current_user.company_id,
         auction_type=auction_data.auction_type, #ihale tipi
         start_time=auction_data.start_time or datetime.utcnow().replace(tzinfo=timezone.utc), #eğer zaman bilgisi girilmişse onu kullanır boş ise şimdiki zamanın utc formatında damgalanmış halini kullanır.
         end_time=auction_data.end_time,
@@ -59,4 +64,16 @@ def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(auction)
     return auction
+
+@router.get("/my", response_model=list[AuctionOut])
+def get_my_auctions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    auctions = db.query(Auction)\
+        .filter(Auction.company_id == current_user.company_id)\
+        .options(joinedload(Auction.product))\
+        .all()
+    return auctions
+
 
