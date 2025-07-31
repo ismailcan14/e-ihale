@@ -54,7 +54,7 @@ export default function EditAuctionPage() {
   const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
   return utcDate.toISOString();
 };
-//saati dilimini utc formatına çevirip 3 saat ileri almak için kullanılan fonksiyon
+//Tarayıcının yerel saatinde girilen zamanı UTC formatına çevirir.
 
   const handleSubmit = async (e: React.FormEvent) => { //submit butonuna basınca calısan fonksiyon
     e.preventDefault(); //sayfanın yenilenmesini önler
@@ -65,7 +65,7 @@ export default function EditAuctionPage() {
       end_time: toUtcISOString(formData.end_time),
       starting_price: parseFloat(formData.starting_price),
       auction_type: formData.auction_type,
-    }; //formdata üzerinden veriler istenilen formatlara fonksiyonlar ile dönüştürülerek payload nesnesi üzerindeki değişkenlere kaydedilir.
+    }; //formdata üzerinden veriler istenilen formatlara fonksiyonlar ile dönüştürülerek sunucuya gönderilecek payload nesnesi üzerindeki değişkenlere kaydedilir.
     //console.log("Gönderilen payload:", payload);
 
     const res = await fetch(`http://127.0.0.1:8000/auctions/${id}`, {
