@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, Literal
+from app.models.auction import AuctionStatus
 
 from app.schemas.product_schema import ProductOut
 
@@ -18,9 +19,15 @@ class AuctionOut(BaseModel):
     end_time: datetime
     starting_price: float
     current_price: Optional[float]
-    is_active: bool
+    status: AuctionStatus
     auction_type: str
     product: Optional[ProductOut] #ihalelein ürün adlarını gösterebilmek için yaptık*
 
     class Config:
         orm_mode = True
+
+class AuctionUpdate(BaseModel): #İhale güncellemek için gerekli schema hepsi optinal yani doldurmasak da olur.
+    start_time: Optional[datetime]
+    end_time: Optional[datetime]
+    starting_price: Optional[float]
+    auction_type: Optional[Literal["highest", "lowest"]]

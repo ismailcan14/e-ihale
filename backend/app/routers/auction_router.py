@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Path
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from sqlalchemy.orm import joinedload
-
+from datetime import timezone
 
 from app.database import SessionLocal
-from app.models.auction import Auction
+from app.models.auction import Auction, AuctionStatus
 from app.models.product import Product
-from app.schemas.auction_schema import AuctionCreate, AuctionOut
+from app.schemas.auction_schema import AuctionCreate, AuctionOut,AuctionUpdate
 from app.models.user import User
 from app.routers.user_router import get_current_user
 
@@ -35,7 +35,11 @@ def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db),cu
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")
     #Ürün yoksa hata mesajı döndürüyoruz.
 
-    existing = db.query(Auction).filter(Auction.product_id == product.id, Auction.is_active == True).first()
+    existing = db.query(Auction).filter(
+    Auction.product_id == product.id,
+    Auction.status == AuctionStatus.ACTIVE
+    ).first()
+
     if existing:
         raise HTTPException(status_code=400, detail="Bu ürün için zaten aktif bir ihale var")
     #o ürünün aktif ihalesi varsa geriye hata mesajı döndürüyoruz.
@@ -78,6 +82,46 @@ def get_my_auctions(
         .all() #Burada Auction modeline bir sorgu yazıyoruz sorguda auction tablosundaki company_id ile giriş yapan kullanıcının company id si eşleşen kayıtların ilişkili olduğu Product tablosundaki kayıtların tümünü alıyoruz ve bu kayıtlar auction nesnesinde tutuluyor. K
     return auctions
 #Kayıt geri döndürülürken de auctionOut modeline göre eşleşen veriler AuctionOut modeline dolduruluyor ve geri döndürülüyor. AuctionsOut modeline  "product: Optional[ProductOut]" eklemiştik. bu kısmıda ürün bilgilerini auctionOut modeline atabilmek  için yaptık.
+
+
+# İhale Güncelleme
+@router.put("/{auction_id}", response_model=AuctionOut) #güncelleme(put) endpointini id li şekilde oluşturuyoruz ve fonksiyondan dönen nesnenin auctionOut scheması şeklinde olduğunu bildiriyoruz.
+def update_auction(
+    auction_id: int = Path(..., description="Güncellenecek ihalenin ID’si"),
+    updated_data: AuctionUpdate = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+): #Güncelleme fonksiyonumuz var ve 4 adet parametre alıyor. auction_id api isteği atarken url ye yazdıgımız id yi temsil ediyor
+    #updated_data istekte gelen form verisinin auctionUpdate scheması şeklinde gelmesini bekliyor
+    #db bildiğimiz gibi get_db fonksiyonu ile fonksiyon çalışana kadar veritabanı bağlantısı sağlıyor.
+    #current_user nesneside User modelinde ve get_current_user fonksiyonu ile giriş yapan kullanıcının bilgilerini tutuyor.
+    auction = db.query(Auction).filter(
+        Auction.id == auction_id,
+        Auction.company_id == current_user.company_id
+    ).first()
+    #auction modelinde bir sorgu yapıyoruz bu sorgu Auction tablosunda istek urlsinde gelen ve auction_id değişkeninde tutulan id deki ve giriş yapan kullanıcının şirket id sinde ki eşleşen kayıtların ilkini(zaten o auction id de 1 kayıt olur başka kayıt gelmez) bize döndürüyor ve auction nesnesinde bu kaydı tutuyoruz. 
+
+    if not auction:
+        raise HTTPException(status_code=404, detail="İhale bulunamadı") #Hata mesajı
+
+    if auction.status == AuctionStatus.ACTIVE:
+        raise HTTPException(status_code=400, detail="Aktif ihaleler güncellenemez") #gelen ihaledeki status bilgisi active ise yani ihale aktif ise güncellenemez diye uyarı mesajı gönderiyoruz.
+
+    data = updated_data.dict(exclude_unset=True)
+    #gelen formVerileri update_data adlı nesnede tutuluyordu bu nesneyi sözlük haline çevirip yani bir anahtar ve bir değer şekline çeviriyoruz. exclude_unset=True ise parametre olarak update_data değişkeni auctionupdate scheması seklınde beklenıyordu eğer beklenen değişkenlerden örnek olarak sadece 1 tanesi geliyorsa sadece kullanıcı tarafından gönderileni alırız ancak exclude_unset=false olsaydı 1 değişken değişseydi diğer 3 ü boş olarak kalırdı ve bu büyük sorunlara yol açabilirdi.
+    if "start_time" in data and data["start_time"] and data["start_time"].tzinfo is None:
+        data["start_time"] = data["start_time"].replace(tzinfo=timezone.utc)
+    if "end_time" in data and data["end_time"] and data["end_time"].tzinfo is None:
+        data["end_time"] = data["end_time"].replace(tzinfo=timezone.utc)
+        #Gelen zaman değişkenlerinde utc formatına çeviriyoruz. Bunun detaylı açıklaması createAuction da var
+
+    for key, value in data.items():
+        setattr(auction, key, value)
+  #data sözlüğündeki her bir alanı auction nesnesine uyguluyoruz ornek olarak "starting_price": 100.0 varsa → setattr(auction, "starting_price", 100.0) işlemi yapılır.
+    db.commit()
+    db.refresh(auction)
+    return auction
+#veritabanımıza commitleyip refresh ile auction nesnesinin son halini çekip return ile geri döndürüyoruz.
 
 
 

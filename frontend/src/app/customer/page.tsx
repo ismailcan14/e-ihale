@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react"
-
+console.log("🚨 DashboardPage ÇALIŞTI!");
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [user, setUser] = useState<any>(null) 
