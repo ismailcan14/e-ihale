@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
+import { FaPlus, FaCalendarAlt, FaDollarSign, FaBoxOpen, FaGavel } from 'react-icons/fa';
 export default function CreateAuctionPage() {
   const [products, setProducts] = useState<any[]>([]); //ürünü tutacak değişkenin ve onu çekecek fonksiyonun statini boş olarak oluşturuyoruz.
   const [formData, setFormData] = useState({
@@ -75,72 +75,101 @@ export default function CreateAuctionPage() {
     }
   };
 
-  return (
-    <div className="max-w-xl mx-auto mt-20 p-6 bg-white rounded shadow">
-      <h1 className="text-2xl font-bold mb-4 text-gray-800">Yeni İhale Oluştur</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 font-medium text-gray-800">
+return (
+  <div className="bg-white flex items-start justify-center pt-[72px] px-4 pb-10">
+    <div className="w-full max-w-md bg-white border border-gray-300 rounded-xl p-6">
+      <h1 className="text-2xl font-bold text-center text-gray-800 mb-5 flex items-center justify-center gap-2">
+        <FaGavel className="text-blue-600" /> Yeni İhale Oluştur
+      </h1>
 
-        <select
-          name="product_id"
-          value={formData.product_id}
-          onChange={handleChange}
-          className="w-full p-2 border rounded font-medium text-gray-800"
-          required
-        >
-          <option value="">Ürün Seçin</option>
-          {products.map((product) => (
-            <option key={product.id} value={product.id}>
-              {product.name}
-            </option>
-          ))}
-        </select>
+      <form onSubmit={handleSubmit} className="space-y-4 text-gray-800">
+        <div>
+          <label className="font-semibold mb-1 flex items-center gap-2">
+            <FaBoxOpen /> Ürün Seçin
+          </label>
+          <select
+            name="product_id"
+            value={formData.product_id}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Ürün Seçin</option>
+            {products.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <input
-          type="datetime-local"
-          name="start_time"
-          value={formData.start_time}
-          onChange={handleChange}
-          className="w-full p-2 border rounded font-medium text-gray-800"
-          required
-        />
+        <div>
+          <label className="font-semibold mb-1 flex items-center gap-2">
+            <FaCalendarAlt /> Başlangıç Zamanı
+          </label>
+          <input
+            type="datetime-local"
+            name="start_time"
+            value={formData.start_time}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-        <input
-          type="datetime-local"
-          name="end_time"
-          value={formData.end_time}
-          onChange={handleChange}
-          className="w-full p-2 border rounded font-medium text-gray-800"
-          required
-        />
+        <div>
+          <label className="font-semibold mb-1 flex items-center gap-2">
+            <FaCalendarAlt /> Bitiş Zamanı
+          </label>
+          <input
+            type="datetime-local"
+            name="end_time"
+            value={formData.end_time}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-        <input
-          type="number"
-          name="starting_price"
-          value={formData.starting_price}
-          onChange={handleChange}
-          className="w-full p-2 border rounded font-medium text-gray-800"
-          placeholder="Başlangıç Fiyatı"
-          required
-        />
+        <div>
+          <label className="font-semibold mb-1 flex items-center gap-2">
+            <FaDollarSign /> Başlangıç Fiyatı
+          </label>
+          <input
+            type="number"
+            name="starting_price"
+            value={formData.starting_price}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="₺"
+            required
+          />
+        </div>
 
-        <select
-          name="auction_type"
-          value={formData.auction_type}
-          onChange={handleChange}
-          className="w-full p-2 border rounded font-medium text-gray-800"
-          required
-        >
-          <option value="highest">En Yüksek Teklif Kazanır</option>
-          <option value="lowest">En Düşük Teklif Kazanır</option>
-        </select>
+        <div>
+          <label className="font-semibold mb-1 flex items-center gap-2">
+            <FaGavel /> İhale Tipi
+          </label>
+          <select
+            name="auction_type"
+            value={formData.auction_type}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="highest">En Yüksek Teklif Kazanır</option>
+            <option value="lowest">En Düşük Teklif Kazanır</option>
+          </select>
+        </div>
 
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2"
         >
-          İhaleyi Oluştur
+          <FaPlus /> İhaleyi Oluştur
         </button>
       </form>
     </div>
-  );
+  </div>
+);
 }

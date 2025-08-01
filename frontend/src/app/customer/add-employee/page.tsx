@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
+import { FaUser, FaEnvelope, FaLock, FaUserTag, FaGavel, FaPlus } from 'react-icons/fa';
 export default function AddEmployeePage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -39,83 +39,84 @@ export default function AddEmployeePage() {
     } //çalışan başarılı bir şekilde eklenirse setFormData ile formData nesnesi yine null hale getirilir. aksi halde bir hata mesajı döndürülür.
   };
 
-  return (
- <div className="max-w-xl mx-auto mt-12 p-6 bg-white rounded shadow">
-  <h1 className="text-2xl font-bold text-gray-900 mb-6">Yeni Çalışan Ekle</h1>
-  <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label htmlFor="name" className="block mb-1 text-sm font-semibold text-gray-800">
-            Ad Soyad
-          </label>
-          <input
-            name="name"
-            type="text"
-            id="name"
-            placeholder="Ad Soyad"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full p-3 border rounded text-gray-900"
-            required
-          />
-        </div>
+ return (
+    <div className="bg-white flex items-start justify-center pt-[72px] px-4 pb-10">
+      <div className="w-full max-w-md bg-white border border-gray-300 rounded-xl p-6">
+        <h1 className="text-2xl font-bold text-center text-gray-800 mb-5 flex items-center justify-center gap-2">
+          <FaUserTag className="text-blue-600" /> Yeni Çalışan Ekle
+        </h1>
 
-        <div>
-          <label htmlFor="email" className="block mb-1 text-sm font-semibold text-gray-800">
-            E-posta
-          </label>
-          <input
-            name="email"
-            type="email"
-            id="email"
-            placeholder="E-posta"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full p-3 border rounded text-gray-900"
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-4 text-gray-800">
+          <div>
+            <label className="font-semibold mb-1 flex items-center gap-2">
+              <FaUser /> Ad Soyad
+            </label>
+            <input
+              name="name"
+              type="text"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ad Soyad"
+              required
+            />
+          </div>
 
-        <div>
-          <label htmlFor="password" className="block mb-1 text-sm font-semibold text-gray-800">
-            Şifre
-          </label>
-          <input
-            name="password"
-            type="password"
-            id="password"
-            placeholder="Şifre"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full p-3 border rounded text-gray-900"
-            required
-          />
-        </div>
+          <div>
+            <label className="font-semibold mb-1 flex items-center gap-2">
+              <FaEnvelope /> E-posta
+            </label>
+            <input
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="E-posta"
+              required
+            />
+          </div>
 
-        <div>
-          <label htmlFor="role_id" className="block mb-1 text-sm font-semibold text-gray-800">
-            Rol
-          </label>
-          <select
-            name="role_id"
-            id="role_id"
-            value={formData.role_id}
-            onChange={handleChange}
-            className="w-full p-3 border rounded text-gray-900"
-            required
+          <div>
+            <label className="font-semibold mb-1 flex items-center gap-2">
+              <FaLock /> Şifre
+            </label>
+            <input
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Şifre"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="font-semibold mb-1 flex items-center gap-2">
+              <FaUserTag /> Rol
+            </label>
+            <select
+              name="role_id"
+              value={formData.role_id}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Rol Seçin</option>
+              <option value="2">Müdür</option>
+              <option value="3">Personel</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2"
           >
-            <option value="">Rol Seçin</option>
-            <option value="2">Müdür</option>
-            <option value="3">Personel</option>
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 font-semibold"
-        >
-          Kaydet
-        </button>
-      </form>
+            <FaPlus /> Kaydet
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

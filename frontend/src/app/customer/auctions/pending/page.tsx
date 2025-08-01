@@ -5,11 +5,21 @@ import { useRouter } from 'next/navigation';
 
 export default function PendingAuctionsPage() {
   const [pendingAuctions, setPendingAuctions] = useState<any[]>([]);
+  const [userRole, setUserRole] = useState<number>(0);
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
+    
+    fetch("http://127.0.0.1:8000/users/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => setUserRole(data.role_id)) 
+      .catch(err => console.error("Kullanıcı bilgileri alınamadı:", err));
+  // apiye istek atarak kullanıcı bilgileri çekip json formatında data nesnesine atıyoruz. ardından setUserRole fonksiyonu ile data da bulunan role bilgisini state e yolluyoruz state gelen değeri userRole değişkeninde tutuyor
+    
     fetch("http://127.0.0.1:8000/auctions/my", {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -21,13 +31,19 @@ export default function PendingAuctionsPage() {
       .catch((err) => console.error("Bekleyen ihaleler alınamadı:", err));
   }, []);
 
-
   const formatLocalTime = (utcString: string) => {
     const date = new Date(utcString);
     const localDate = new Date(date.getTime() + 3 * 60 * 60 * 1000);
     return localDate.toLocaleString();
   };
-  //active sayfası ile aynı olduğu için açıklamaya gerek yok
+
+  const handleEditClick = (auctionId: number) => {
+    if (userRole === 3) {
+      alert("Yetkisiz erişim! Bu işlemi yapma izniniz yok.");
+    } else {
+      router.push(`/customer/edit-auction/${auctionId}`);
+    }
+  }; // Güncelle butonuna basıldığındna calısacak bir fonksiyon parametre olarak auction ın id sini tutuyor. içerideki kontrolde eğer role ü personel ise butona bastığında uyarı mesajı veriyor haricinde güncelleme sayfasına yönlendiriyor.
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-10 px-6">
@@ -41,14 +57,8 @@ export default function PendingAuctionsPage() {
 
         {pendingAuctions.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg mt-10 max-w-md mx-auto">
-            <svg className="w-20 h-20 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
             <p className="text-xl font-semibold text-gray-600 dark:text-gray-300 text-center">
               Şu anda bekleyen ihale bulunmamaktadır.
-            </p>
-            <p className="text-md text-gray-500 dark:text-gray-400 text-center mt-2">
-              Yeni ihaleler oluşturduğunuzda veya onaylandığında burada listelenecektir.
             </p>
           </div>
         ) : (
@@ -65,33 +75,18 @@ export default function PendingAuctionsPage() {
                 </h2>
 
                 <div className="space-y-2 text-sm">
-                  <p className="flex items-center">
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 mr-2 min-w-[90px]">Başlangıç:</span>
-                    <span className="text-gray-800 dark:text-gray-200">{formatLocalTime(auction.start_time)}</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 mr-2 min-w-[90px]">Bitiş:</span>
-                    <span className="text-gray-800 dark:text-gray-200">{formatLocalTime(auction.end_time)}</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 mr-2 min-w-[90px]">Fiyat:</span>
-                    <span className="text-lg font-bold text-green-600 dark:text-green-400">{auction.starting_price} ₺</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 mr-2 min-w-[90px]">Tip:</span>
-                    <span className="text-gray-800 dark:text-gray-200">
-                      {auction.auction_type === 'highest' ? 'En Yüksek Teklif' : 'En Düşük Teklif'}
-                    </span>
-                  </p>
+                  <p><strong>Başlangıç:</strong> {formatLocalTime(auction.start_time)}</p>
+                  <p><strong>Bitiş:</strong> {formatLocalTime(auction.end_time)}</p>
+                  <p><strong>Fiyat:</strong> {auction.starting_price} ₺</p>
+                  <p><strong>Tip:</strong> {auction.auction_type === 'highest' ? 'En Yüksek Teklif' : 'En Düşük Teklif'}</p>
                 </div>
 
                 <button
-                  onClick={() => router.push(`/customer/edit-auction/${auction.id}`)}
+                  onClick={() => handleEditClick(auction.id)}
                   className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
                 >
                   ✏️ Güncelle
-                </button> 
-                {/* Burada useRouter sınıfı ile butona tıkandığuında id ile beraber edit-auction/id sayfasına yönlnedirme yapıyoruz. */}
+                </button>
               </div>
             ))}
           </div>

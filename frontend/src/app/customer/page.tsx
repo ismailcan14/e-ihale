@@ -1,7 +1,14 @@
 'use client'
 
 import { useEffect, useState } from "react"
-console.log("🚨 DashboardPage ÇALIŞTI!");
+import {
+  FaUser,
+  FaEnvelope,
+  FaBuilding,
+  FaUserShield,
+  FaIndustry,
+} from "react-icons/fa";
+//console.log(" DashboardPage ÇALIŞTI!");
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [user, setUser] = useState<any>(null) 
@@ -43,41 +50,63 @@ export default function DashboardPage() {
  
   if (!user || !company) return <p className="text-gray-600">Yükleniyor...</p>;
 
-  return (
-    <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Profil Bilgileri</h2>
-<p className="mb-2">
-  <span className="font-semibold text-black">Ad:</span> <span className="text-black">{user.name}</span>
-</p>
-<p className="mb-2">
-  <span className="font-semibold text-black">Email:</span> <span className="text-black">{user.email}</span>
-</p>
-<p className="mb-2">
-  <span className="font-semibold text-black">Şirket ID:</span> <span className="text-black">{user.company_id}</span>
-</p>
-<p className="mb-2">
-  <span className="font-semibold text-black">Rol:</span>{" "}
-  <span className="text-black">
-    {user.role_id === 1
-      ? "Admin"
-      : user.role_id === 2
-      ? "Müdür"
-      : user.role_id === 3
-      ? "Personel"
-      : "Bilinmeyen Rol"}
-  </span>
-</p>
-<p className="mb-2">
-  <span className="font-semibold text-black">Şirket Tipi:</span>{" "}
-  <span className="text-black">
-    {company?.type === "customer"
-      ? "Müşteri"
-      : company?.type === "supplier"
-      ? "Tedarikçi"
-      : "Bilinmeyen"}
-  </span>
-</p>
+    return (
+    <div className="min-h-screen bg-white flex items-start justify-center pt-[72px] px-4 pb-10">
+      <div className="w-full max-w-md bg-white border border-gray-300 rounded-xl p-6">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6 flex items-center justify-center gap-2">
+          <FaUser className="text-blue-600" /> Profil Bilgileri
+        </h2>
 
+        <div className="space-y-4">
+          <ProfileItem icon={<FaUser />} label="Ad" value={user.name} />
+          <ProfileItem icon={<FaEnvelope />} label="Email" value={user.email} />
+          <ProfileItem icon={<FaBuilding />} label="Şirket ID" value={user.company_id} />
+          <ProfileItem
+            icon={<FaUserShield />}
+            label="Rol"
+            value={
+              user.role_id === 1
+                ? 'Admin'
+                : user.role_id === 2
+                ? 'Müdür'
+                : user.role_id === 3
+                ? 'Personel'
+                : 'Bilinmeyen Rol'
+            }
+          />
+          <ProfileItem
+            icon={<FaIndustry />}
+            label="Şirket Tipi"
+            value={
+              company?.type === 'customer'
+                ? 'Müşteri'
+                : company?.type === 'supplier'
+                ? 'Tedarikçi'
+                : 'Bilinmeyen'
+            }
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProfileItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center border border-gray-200 rounded-lg px-4 py-3">
+      <div className="text-blue-600 text-xl mr-4">{icon}</div>
+      <div>
+        <p className="text-sm text-gray-500">{label}</p>
+        <p className="font-semibold text-gray-800">{value}</p>
+      </div>
     </div>
   );
 }

@@ -19,7 +19,6 @@ const menuItems = [
 },
   { path: "/customer/offers", label: "Gelen Teklifler", roles: ["admin", "müdür"] },
   { path: "/customer/winner-selection", label: "Kazanan Belirleme", roles: ["admin"] },
-  { path: "/customer/update-auction", label: "İhale Güncelleme", roles: ["admin", "müdür"] },
   { path: "/customer/auction-history", label: "İhale Geçmişi", roles: ["admin", "müdür", "personel"] },
   { path: "/customer/supplier-management", label: "Tedarikçi Yönetimi", roles: ["admin"] },
   { path: "/customer/reports", label: "Raporlar", roles: ["admin", "müdür"] },
