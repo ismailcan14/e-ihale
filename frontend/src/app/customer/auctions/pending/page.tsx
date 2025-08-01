@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { FaGavel } from 'react-icons/fa';
 
 export default function PendingAuctionsPage() {
   const [pendingAuctions, setPendingAuctions] = useState<any[]>([]);
@@ -45,53 +46,47 @@ export default function PendingAuctionsPage() {
     }
   }; // Güncelle butonuna basıldığındna calısacak bir fonksiyon parametre olarak auction ın id sini tutuyor. içerideki kontrolde eğer role ü personel ise butona bastığında uyarı mesajı veriyor haricinde güncelleme sayfasına yönlendiriyor.
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-10 px-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-5xl font-extrabold mb-4 text-center text-blue-800 dark:text-blue-400 tracking-tight">
-          Bekleyen İhalelerim
-        </h1>
-        <p className="text-lg text-center text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto">
-          Başlangıç zamanı henüz gelmemiş ve onay bekleyen tüm ihalelerinizi buradan takip edebilirsiniz.
-        </p>
+return (
+  <div className="min-h-screen bg-white text-gray-900 py-10 px-6">
+    <div className="max-w-7xl mx-auto">
+       <h1 className="text-3xl font-bold text-center text-gray-800 mb-8 flex items-center justify-center gap-2">
+              <FaGavel className="text-blue-600" /> Bekleyen İhalelerim
+            </h1>
+      {pendingAuctions.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-8 bg-white border border-gray-200 rounded-xl shadow-sm mt-10 max-w-md mx-auto">
+          <p className="text-lg font-medium text-gray-600 text-center">
+            Şu anda bekleyen ihale bulunmamaktadır.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+          {pendingAuctions.map((auction) => (
+            <div
+              key={auction.id}
+              className="bg-white border border-gray-200 text-gray-800 rounded-2xl shadow-md p-6 w-full max-w-sm transition-transform transform hover:scale-105 hover:shadow-lg hover:border-blue-500"
+            >
+              <h2 className="text-xl font-bold text-blue-700 mb-3 truncate" title={auction.product?.name || 'Belirsiz Ürün'}>
+                {auction.product?.name || 'Belirsiz Ürün'}
+              </h2>
 
-        {pendingAuctions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg mt-10 max-w-md mx-auto">
-            <p className="text-xl font-semibold text-gray-600 dark:text-gray-300 text-center">
-              Şu anda bekleyen ihale bulunmamaktadır.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
-            {pendingAuctions.map((auction) => (
-              <div
-                key={auction.id}
-                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-3xl shadow-xl p-7 flex flex-col gap-4
-                           transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-500 border border-transparent
-                           w-full max-w-sm"
-              >
-                <h2 className="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-2 truncate" title={auction.product?.name || 'Belirsiz Ürün'}>
-                  {auction.product?.name || 'Belirsiz Ürün'}
-                </h2>
-
-                <div className="space-y-2 text-sm">
-                  <p><strong>Başlangıç:</strong> {formatLocalTime(auction.start_time)}</p>
-                  <p><strong>Bitiş:</strong> {formatLocalTime(auction.end_time)}</p>
-                  <p><strong>Fiyat:</strong> {auction.starting_price} ₺</p>
-                  <p><strong>Tip:</strong> {auction.auction_type === 'highest' ? 'En Yüksek Teklif' : 'En Düşük Teklif'}</p>
-                </div>
-
-                <button
-                  onClick={() => handleEditClick(auction.id)}
-                  className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
-                >
-                  ✏️ Güncelle
-                </button>
+              <div className="space-y-2 text-sm">
+                <p><strong>Başlangıç:</strong> {formatLocalTime(auction.start_time)}</p>
+                <p><strong>Bitiş:</strong> {formatLocalTime(auction.end_time)}</p>
+                <p><strong>Fiyat:</strong> {auction.starting_price} ₺</p>
+                <p><strong>Tip:</strong> {auction.auction_type === 'highest' ? 'En Yüksek Teklif' : 'En Düşük Teklif'}</p>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+              <button
+                onClick={() => handleEditClick(auction.id)}
+                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+              >
+                ✏️ Güncelle
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 }

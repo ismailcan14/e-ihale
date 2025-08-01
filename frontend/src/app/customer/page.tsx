@@ -59,8 +59,6 @@ export default function DashboardPage() {
 
         <div className="space-y-4">
           <ProfileItem icon={<FaUser />} label="Ad" value={user.name} />
-          <ProfileItem icon={<FaEnvelope />} label="Email" value={user.email} />
-          <ProfileItem icon={<FaBuilding />} label="Şirket ID" value={user.company_id} />
           <ProfileItem
             icon={<FaUserShield />}
             label="Rol"
@@ -74,6 +72,8 @@ export default function DashboardPage() {
                 : 'Bilinmeyen Rol'
             }
           />
+          <ProfileItem icon={<FaEnvelope />} label="Email" value={user.email} />
+          <ProfileItem icon={<FaBuilding />} label="Şirket Adı" value={company.name} />
           <ProfileItem
             icon={<FaIndustry />}
             label="Şirket Tipi"

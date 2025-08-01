@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { FaGavel } from 'react-icons/fa';
 
 export default function ActiveAuctionsPage() {
   const [activeAuctions, setActiveAuctions] = useState<any[]>([]); //active ihaleleri tutmak ve bu değişkeni doldurmak için bir state oluşturudk.
@@ -27,61 +28,59 @@ export default function ActiveAuctionsPage() {
     return localDate.toLocaleString();
   }; //utc formatındaki saati Türkiye formatına çevirmek için 3 saat ileri alma fonksiyonu
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-10 px-6">
-      <div className="max-w-7xl mx-auto"> 
-        <h1 className="text-5xl font-extrabold mb-10 text-center text-blue-800 dark:text-blue-400 tracking-tight">
-          Aktif İhalelerim
-        </h1>
+return (
+  <div className="bg-white min-h-screen py-10 px-6">
+    <div className="max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold text-center text-gray-800 mb-8 flex items-center justify-center gap-2">
+        <FaGavel className="text-blue-600" /> Aktif İhalelerim
+      </h1>
 
-        {activeAuctions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg mt-10 max-w-md mx-auto">
-            <svg className="w-20 h-20 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <p className="text-xl font-semibold text-gray-600 dark:text-gray-300 text-center">
-              Şu anda aktif ihale bulunmamaktadır.
-            </p>
-            <p className="text-md text-gray-500 dark:text-gray-400 text-center mt-2">
-              Yeni ihaleler yakında burada listelenecektir.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
-            {activeAuctions.map((auction) => (
-              <div
-                key={auction.id}
-                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-3xl shadow-xl p-7 flex flex-col gap-4 
-                           transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-500 border border-transparent 
-                           w-full max-w-sm" 
-              >
-                <h2 className="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-2 truncate" title={auction.product?.name || 'Belirsiz Ürün'}>
-                  {auction.product?.name || 'Belirsiz Ürün'}
-                </h2>
-                
-                <div className="space-y-2 text-sm">
-                  <p className="flex items-center">
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 mr-2 min-w-[90px]">Başlangıç:</span>
-                    <span className="text-gray-800 dark:text-gray-200">{formatLocalTime(auction.start_time)}</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 mr-2 min-w-[90px]">Bitiş:</span>
-                    <span className="text-gray-800 dark:text-gray-200">{formatLocalTime(auction.end_time)}</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 mr-2 min-w-[90px]">Fiyat:</span>
-                    <span className="text-lg font-bold text-green-600 dark:text-green-400">{auction.starting_price} ₺</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="font-semibold text-gray-600 dark:text-gray-400 mr-2 min-w-[90px]">Tip:</span>
-                    <span className="text-gray-800 dark:text-gray-200">{auction.auction_type === 'highest' ? 'En Yüksek Teklif' : 'En Düşük Teklif'}</span>
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {activeAuctions.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-8 bg-gray-100 rounded-xl shadow-md mt-10 max-w-md mx-auto">
+          <svg className="w-20 h-20 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-lg font-semibold text-gray-700 text-center">
+            Şu anda aktif ihale bulunmamaktadır.
+          </p>
+          <p className="text-sm text-gray-500 text-center mt-1">
+            Yeni ihaleler yakında burada listelenecektir.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+          {activeAuctions.map((auction) => (
+           <div
+  key={auction.id}
+  className="bg-white border border-gray-200 text-gray-800 rounded-2xl shadow-md p-6 w-full max-w-sm transition-transform transform hover:scale-105 hover:shadow-lg hover:border-blue-500"
+>
+  <h2 className="text-xl font-bold text-blue-700 mb-3 truncate" title={auction.product?.name || 'Belirsiz Ürün'}>
+    {auction.product?.name || 'Belirsiz Ürün'}
+  </h2>
+
+  <div className="space-y-2 text-sm">
+    <p className="flex items-center">
+      <span className="font-medium text-gray-600 mr-2 min-w-[90px]">Başlangıç:</span>
+      <span>{formatLocalTime(auction.start_time)}</span>
+    </p>
+    <p className="flex items-center">
+      <span className="font-medium text-gray-600 mr-2 min-w-[90px]">Bitiş:</span>
+      <span>{formatLocalTime(auction.end_time)}</span>
+    </p>
+    <p className="flex items-center">
+      <span className="font-medium text-gray-600 mr-2 min-w-[90px]">Fiyat:</span>
+      <span className="text-base font-bold text-green-600">{auction.starting_price} ₺</span>
+    </p>
+    <p className="flex items-center">
+      <span className="font-medium text-gray-600 mr-2 min-w-[90px]">Tip:</span>
+      <span>{auction.auction_type === 'highest' ? 'En Yüksek Teklif' : 'En Düşük Teklif'}</span>
+    </p>
+  </div>
+</div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 }
