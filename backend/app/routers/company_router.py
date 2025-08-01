@@ -35,6 +35,11 @@ def create_company(company_data: CompanyCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Bu isimde bir şirket zaten var")
     #Burada SQLAlchemy ile Company adlı tabloda kontrol yapılacak. Eğer Company.name yani company tablosundaki şirket adlarından  bizim formdan gelen ve şimdi company_data da bulunan şirket bilgilerinden şirket adı uyuşan yani aynı olan varsa geriye ilk kaydı döndür.
 
+    #user email kontrolü
+    existing_user = db.query(User).filter(User.email == company_data.admin_email).first()
+    if existing_user:
+     raise HTTPException(status_code=400, detail="Bu emailde bir şirket zaten var")
+
     # Şirketi oluştur
     company = Company(name=company_data.company_name,type=company_data.type )
     db.add(company)
