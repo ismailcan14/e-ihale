@@ -69,7 +69,7 @@ def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db),cu
     db.refresh(auction)
     return auction
 
-#Tüm İhaleleri Getirme
+#Giriş Yapan Kullanıcıların Tüm İhaleleri Getirme(Eksik açıklama vardı! düzelttim)
 @router.get("/my", response_model=list[AuctionOut]) #bir get endpointi oluşturuyoruz ve bu endpointe istek geldiğinde dönecek veri modelinin auctionOut şeklinde olduğunu ve bir liste şeklinde olduğunu belirtiyoruz.
 def get_my_auctions(
     db: Session = Depends(get_db),
@@ -122,6 +122,32 @@ def update_auction(
     db.refresh(auction)
     return auction
 #veritabanımıza commitleyip refresh ile auction nesnesinin son halini çekip return ile geri döndürüyoruz.
+
+#Aktif Tüm İhaleleri Getiren Get Endpointi
+@router.get("/active", response_model=list[AuctionOut])
+def get_active_auctions(db: Session = Depends(get_db)):
+    return db.query(Auction)\
+        .filter(Auction.status == AuctionStatus.ACTIVE)\
+        .options(joinedload(Auction.product))\
+        .all() 
+#get endpointi oluşturup yolunu auctions/active olarak belirliyoruz ve response_modeli yani cevap modeli olarak auctionOut modelini belirliyoruz. ardından depends ile veritabanı bağlantımızı açıp bi Auction modeline statusu aktif olan modelleri getir sorgusunu çalıştırıp geriye dönen tüm modelleri AuctionOut modeli şeklinde geriye döndürüyoruz.
+
+# Id ye Göre Tek Bir İhaleyi Getirme
+@router.get("/{auction_id}", response_model=AuctionOut)
+def get_auction_by_id(
+    auction_id: int,
+    db: Session = Depends(get_db)
+):
+    auction = db.query(Auction)\
+        .options(joinedload(Auction.product))\
+        .filter(Auction.id == auction_id)\
+        .first()
+
+    if not auction:
+        raise HTTPException(status_code=404, detail="İhale bulunamadı")
+
+    return auction
+ 
 
 
 

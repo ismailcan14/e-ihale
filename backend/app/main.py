@@ -1,15 +1,14 @@
 #ana programın ayarlarının olduğu bölüm.Projenin başladığı dosya.
 
 from fastapi import FastAPI
-#Bu satır, FastAPI framework’ünden FastAPI sınıfını projene dahil eder.
-  
+
 from .database import Base, engine
 # projenin içindeki database.py dosyasından base ve engine adlı 2 değişkeni import eder.
 
 from . import models
 #kendi projenin modelinde bulunan tabloları bu sayfaya tanıtır.
 
-from .routers import company_router,user_router,product_router,auction_router,bid_router
+from .routers import company_router,user_router,product_router,auction_router,bid_router,websocket_router
 #company routerını main sayfamıza tantıyıoruz.
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +26,7 @@ app.include_router(user_router.router)
 app.include_router(product_router.router)
 app.include_router(auction_router.router)
 app.include_router(bid_router.router)
+app.include_router(websocket_router.router)
 
 
 Base.metadata.create_all(bind=engine)
