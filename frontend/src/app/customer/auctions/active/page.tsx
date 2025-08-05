@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { FaGavel } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
 
 export default function ActiveAuctionsPage() {
   const [activeAuctions, setActiveAuctions] = useState<any[]>([]); //active ihaleleri tutmak ve bu değişkeni doldurmak için bir state oluşturudk.
+  const router = useRouter();//Detay butonu ile yönlendirmek için
+ 
 
   useEffect(() => { //useEffect fonksiyonunu oluşturuyoruz. bu fonksiyon her sayfa yüklendiğinde 1 kere çalışır.
     const token = localStorage.getItem("token"); //tokenı yerel depodan çektik
@@ -37,14 +40,11 @@ return (
 
       {activeAuctions.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-8 bg-gray-100 rounded-xl shadow-md mt-10 max-w-md mx-auto">
-          <svg className="w-20 h-20 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
           <p className="text-lg font-semibold text-gray-700 text-center">
             Şu anda aktif ihale bulunmamaktadır.
           </p>
           <p className="text-sm text-gray-500 text-center mt-1">
-            Yeni ihaleler yakında burada listelenecektir.
+            Tarihi gelen ihaleler burada listelenecektir.
           </p>
         </div>
       ) : (
@@ -76,6 +76,12 @@ return (
       <span>{auction.auction_type === 'highest' ? 'En Yüksek Teklif' : 'En Düşük Teklif'}</span>
     </p>
   </div>
+   <button
+    onClick={() => router.push(`/customer/auctions/active/detail/${auction.id}`)}
+    className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition"
+  >
+    Detay
+  </button>
 </div>
           ))}
         </div>

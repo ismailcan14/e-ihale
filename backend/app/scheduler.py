@@ -13,7 +13,6 @@ scheduler = BackgroundScheduler()
 def activate_auctions():
     db: Session = SessionLocal()
     now = datetime.utcnow()
-
     auctions = db.query(Auction).filter(
         Auction.start_time <= now,
         Auction.status == AuctionStatus.PENDING
@@ -21,7 +20,6 @@ def activate_auctions():
 
     for auction in auctions:
         auction.status = AuctionStatus.ACTIVE
-        print(f" -> Aktif ediliyor: {auction.id}")
 
     db.commit()
     db.close()
@@ -53,7 +51,7 @@ def deactivate_auctions_and_select_winner():
             winning_bid = None
 
         if winning_bid:
-            auction.winner_id = winning_bid.user_id
+            auction.winner_id = winning_bid.supplier.id
 
     db.commit()
     db.close()

@@ -1,11 +1,12 @@
 "use client";
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FaGavel } from 'react-icons/fa';
 
 export default function FinishedAuctionsPage() {
   const [finishedAuctions, setFinishedAuctions] = useState<any[]>([]);
-
+   const router = useRouter();
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -34,14 +35,14 @@ return (
         <FaGavel className="text-blue-600" /> Bitmiş İhalelerim
       </h1>
       {finishedAuctions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-8 bg-white border border-gray-200 rounded-xl shadow-sm mt-10 max-w-md mx-auto">
-          <p className="text-lg font-medium text-gray-600 text-center">
+        <div className="flex flex-col items-center justify-center p-8 bg-gray-100 rounded-xl shadow-md mt-10 max-w-md mx-auto">
+          <p className="text-lg font-semibold text-gray-700 text-center">
             Henüz bitmiş ihale bulunmamaktadır.
           </p>
-          <p className="text-sm text-gray-500 text-center mt-2">
+           <p className="text-sm text-gray-500 text-center mt-1">
             Tamamlanan ihaleleriniz burada görünecektir.
           </p>
-        </div>
+         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
           {finishedAuctions.map((auction) => (
@@ -59,6 +60,12 @@ return (
                 <p><strong>Fiyat:</strong> <span className="text-green-600 font-semibold">{auction.starting_price} ₺</span></p>
                 <p><strong>Tip:</strong> {auction.auction_type === 'highest' ? 'En Yüksek Teklif' : 'En Düşük Teklif'}</p>
               </div>
+             <button
+            onClick={() => router.push(`/customer/auctions/finished/detail/${auction.id}`)}
+            className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            Sonuçları Görüntüle
+          </button>
             </div>
           ))}
         </div>

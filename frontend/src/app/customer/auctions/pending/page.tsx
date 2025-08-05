@@ -53,11 +53,14 @@ return (
               <FaGavel className="text-blue-600" /> Bekleyen İhalelerim
             </h1>
       {pendingAuctions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-8 bg-white border border-gray-200 rounded-xl shadow-sm mt-10 max-w-md mx-auto">
-          <p className="text-lg font-medium text-gray-600 text-center">
+        <div className="flex flex-col items-center justify-center p-8 bg-gray-100 rounded-xl shadow-md mt-10 max-w-md mx-auto">
+          <p className="text-lg font-semibold text-gray-700 text-center">
             Şu anda bekleyen ihale bulunmamaktadır.
           </p>
-        </div>
+           <p className="text-sm text-gray-500 text-center mt-1">
+            İleri tarihli ihaleler burada listelenecektir
+          </p>
+         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
           {pendingAuctions.map((auction) => (
