@@ -10,6 +10,7 @@ from app.models.product import Product
 from app.schemas.auction_schema import AuctionCreate, AuctionOut,AuctionUpdate
 from app.models.user import User
 from app.routers.user_router import get_current_user
+from app.routers.websocket_router import active_connections
 
 router=APIRouter(
     prefix="/auctions",
@@ -148,6 +149,40 @@ def get_auction_by_id(
 
     return auction
  
+
+ #Butona basıldığında tekliflerin görünümünü açık hale getiren endpoint
+
+import json
+from app.routers.websocket_router import active_connections
+
+@router.put("/{auction_id}/toggle-public-bids")
+async def toggle_public_bids(
+    auction_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    auction = db.query(Auction).filter(Auction.id == auction_id).first()
+    if not auction:
+        raise HTTPException(status_code=404, detail="İhale bulunamadı")
+    if auction.company_id != current_user.company_id:
+        raise HTTPException(status_code=403, detail="Bu ihaleye erişiminiz yok")
+
+    # is_public_bids tersine çevrilir
+    auction.is_public_bids = not auction.is_public_bids
+    db.commit()
+
+    # WebSocket üzerinden görünürlük değişimini bildir
+    connections = active_connections.get(auction_id, [])
+    for connection in connections:
+        try:
+            await connection.send_text(json.dumps({
+                "type": "toggle_visibility",
+                "is_public_bids": auction.is_public_bids
+            }))
+        except Exception as e:
+            print("WebSocket gönderim hatası (toggle-public-bids):", e)
+
+    return {"is_public_bids": auction.is_public_bids}
 
 
 

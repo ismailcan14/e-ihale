@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, ForeignKey, DateTime, String, Enum
+from sqlalchemy import Boolean, Column, Integer, Float, ForeignKey, DateTime, String, Enum
 from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
@@ -21,7 +21,7 @@ class Auction(Base):
     end_time = Column(DateTime)
     starting_price = Column(Float)
     current_price = Column(Float)
-
+    is_public_bids = Column(Boolean, default=False) #teklifleri herkesin görebilmesi için oluşturdum.
     status = Column(
         Enum(AuctionStatus, name="auction_status", native_enum=False),
         default=AuctionStatus.PENDING

@@ -87,7 +87,8 @@ async def place_bid(bid_data: BidCreate, db: Session = Depends(get_db)):
                     "name": user.name,
                     "company": company_name,
                     "role": role_name
-                }
+                },
+                "is_public_bids": auction.is_public_bids 
             }))
         except Exception as e:
             print(f"WebSocket gönderim hatası: {e}")

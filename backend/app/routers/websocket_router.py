@@ -23,7 +23,6 @@ async def websocket_endpoint(websocket: WebSocket, auction_id: int):
         
         token = websocket.query_params.get("token")
         if not token:
-            print("❌ Token eksik")
             await websocket.close(code=1008)
             return
         #Token bilgisini url den alıyoruz
@@ -32,11 +31,9 @@ async def websocket_endpoint(websocket: WebSocket, auction_id: int):
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             email = payload.get("sub")
             if not email:
-                print("❌ Token içinde email (sub) bulunamadı")
                 await websocket.close(code=1008)
                 return
         except JWTError as e:
-            print("❌ JWT decode hatası:", e)
             await websocket.close(code=1008)
             return
         # Tokeni jwt.decode ile çzümleyip içerisindeki email bilgisini email adlı değişkenimize gönderiyoruz.
@@ -44,14 +41,12 @@ async def websocket_endpoint(websocket: WebSocket, auction_id: int):
        
         user = db.query(User).filter(User.email == email).first()
         if not user:
-            print("❌ Kullanıcı bulunamadı")
             await websocket.close(code=1008)
             return
          #Tokendan çıkan email ile kayıtlı bir kullanıcı var mı diye kontrol ediyoruz varsa user adlı değişkene atıyoruz. Yani şuan giriş yapan ve token sahibi kullanıcının user bilgileri elimizde.
 
         
         await websocket.accept()
-        print(f"✅ WebSocket bağlantısı kabul edildi: {email}")
         #WebSocket bağlantısını kabul ediyoruz  
 
         # 5️⃣ Bağlantıyı kayıt et
@@ -65,7 +60,6 @@ async def websocket_endpoint(websocket: WebSocket, auction_id: int):
             await websocket.receive_text() #Dinleme döngüsü(bağlantıya bir şey eklenirse otomatik olarak fark edebilmek için)
 
     except WebSocketDisconnect:
-        print(f"⚠️ {email} bağlantısı koptu")
         if auction_id in active_connections and websocket in active_connections[auction_id]:
             active_connections[auction_id].remove(websocket)
             #internet giderse veya tarayıcıyı kapatırsa hata mesajı fırlatılır. ve ilgili auction_id den çıkarılr.

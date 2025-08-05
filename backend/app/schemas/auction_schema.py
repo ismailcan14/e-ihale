@@ -21,6 +21,7 @@ class AuctionOut(BaseModel):
     current_price: Optional[float]
     status: AuctionStatus
     auction_type: str
+    is_public_bids: bool
     product: Optional[ProductOut] #ihalelein ürün adlarını gösterebilmek için yaptık*
 
     class Config:
