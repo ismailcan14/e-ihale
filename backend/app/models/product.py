@@ -1,6 +1,11 @@
-from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey
+import enum
+from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey,Enum  
 from sqlalchemy.orm import relationship
 from app.database import Base
+
+class ProductType(enum.Enum):
+    PRODUCT = "PRODUCT"
+    SERVICE = "SERVICE"
 
 class Product(Base):
     
@@ -12,6 +17,11 @@ class Product(Base):
     description=Column(String(200),nullable=True)
     price=Column(Float,nullable=False)
     stock=Column(Integer,default=0)
+    type = Column(
+     Enum(ProductType, name="product_type_enum"),  # düzeltme burada
+     nullable=False,
+     default=ProductType.PRODUCT
+)
 
     #İlişkiler
     company=relationship("Company",back_populates="products")

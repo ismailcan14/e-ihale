@@ -20,8 +20,8 @@ const menuItems = [
   { path: "/customer/offers", label: "Gelen Teklifler", roles: ["admin", "müdür"] },
   { path: "/customer/winner-selection", label: "Kazanan Belirleme", roles: ["admin"] },
   { path: "/customer/auction-history", label: "İhale Geçmişi", roles: ["admin", "müdür", "personel"] },
-  { path: "/customer/supplier-management", label: "Tedarikçi Yönetimi", roles: ["admin"] },
-  { path: "/customer/reports", label: "Raporlar", roles: ["admin", "müdür"] },
+  { path: "/customer/create-product", label: "Ürün ve Hizmet Ekleme", roles: ["admin","müdür"] },
+  { path: "/customer/products-services", label: "Ürün Ve Hizmetlerim", roles: ["admin", "müdür"] },
   { path: "/customer/add-employee", label: "Çalışan Ekle", roles: ["admin"] }, 
 ];
 

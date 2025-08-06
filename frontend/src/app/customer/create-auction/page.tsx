@@ -85,7 +85,7 @@ return (
       <form onSubmit={handleSubmit} className="space-y-4 text-gray-800">
         <div>
           <label className="font-semibold mb-1 flex items-center gap-2">
-            <FaBoxOpen /> Ürün Seçin
+            <FaBoxOpen /> Ürün-Hizmet Seçin
           </label>
           <select
             name="product_id"
@@ -94,7 +94,7 @@ return (
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           >
-            <option value="">Ürün Seçin</option>
+            <option value="">Ürün-Hizmet Seçin</option>
             {products.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.name}

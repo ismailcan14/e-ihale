@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models.product import Product
 from app.schemas.product_schema import ProductOut,ProductCreate
+from app.models.user import User
+from app.routers.user_router import get_current_user
 
 router = APIRouter(
     prefix="/products",
@@ -17,11 +19,12 @@ def get_db():
 
 #Ürün oluşturma
 @router.post("/",response_model=ProductOut) #docs/products yoluna gelen post isteğinde bu fonksiyon çalışır. responseModel ile istek sonrası geri dönen kaydın hangi verileri(satırları) içecereceğini productOut classıyla belirliyoruz.
-def create_product(product:ProductCreate,db:Session=Depends(get_db)):
+def create_product(product:ProductCreate,db:Session=Depends(get_db),current_user: User = Depends(get_current_user)):
     #2 adet parametre alıyor birincisi product ve ProductCreate türünde formdan gelen verileri bu şablona doldurucağız. db ile de veritabanı bağlantısın açıyoruz.
     new_product = Product(**product.model_dump())  
  #product bir pydantic sözlüğüdür yani bir ProductCreate dir. product.dict() i model_dump() ile değiştirdik ikiside aynı işlevi görüyor ancak pydantic v1 de dict() kullanılırken pydantic v2 de model_dump() kullanılır işlevi ise product nesnesini bir  python sözlüğüne çevirir. python sözlüğü, anahtar ve değer çiftlerinden oluşan bir veri tipidir. Json formatına çok benziyor.
     # ** ile de product.dict te bulunan değerleri Product modeline aktarırız. Aynı biçimde olan anahtarlara karşılıkları yazılır. bunu da new_product adlı Product nesnesi üzerinde tutarız. (Constructorlı bir sınıfa nesne oluşturur gibi.)
+    new_product.company_id = current_user.company_id
     db.add(new_product) #bu nesneyi veritabanına eklemek üzere hazır hale getirir 
     db.commit() #commit ile veritabanına gerçek olarak kaydı ekleriz
     db.refresh(new_product) #kaydı ekledikten sonra gelen id, created_at gibi değişkenleri new_product nesnemize aktarırız yani güncelleriz 
