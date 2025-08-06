@@ -13,17 +13,17 @@ export default function CreateAuctionPage() {
   });
  //inputları doldurduğumuz formdata ve formData yı doldurduğumuz setFormData nın stateini oluşturuyoruz ve forma gönderilecek verilerin şablonunu hazırlıyoruz. 
   useEffect(() => { //Sayfa yüklendiğinde bir kere çalışan fonksiyondur !
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    fetch("http://127.0.0.1:8000/products", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => setProducts(data))
-      .catch(err => console.error("Ürünler alınamadı:", err));
-  }, []);
+      fetch("http://127.0.0.1:8000/products/my", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(res => res.json())
+        .then(data => setProducts(data))
+        .catch(err => console.error("Ürünler alınamadı:", err));
+    }, []);
   //ürün apisine bir get isteği atıyoruz. isteğin gövdesinde token bilgisi de bulunuyor yani bak ben giriş yapmış bir kullancıyım diyoruz ardından istekten dönen mesaj res üzerinde tutuluyor önceden de açıkladığım gibi dönen ham veri res e geliyor bunu json formatına çevirip data adlı nesneye aktarıyoruz. gelen veriler artık data da tutuluyor. sonrasında state in setProduct fonksiyonu ile gelen ürün verisni state e yolluyoruz.
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

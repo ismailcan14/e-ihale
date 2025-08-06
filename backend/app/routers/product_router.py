@@ -33,4 +33,15 @@ def create_product(product:ProductCreate,db:Session=Depends(get_db),current_user
 def get_products(db:Session=Depends(get_db)):
     return db.query(Product).all() #Depends ile get_db fonksiyonunu db parametresine enjekte edip Product tablosundan gelen verileri ProductOut a göre kullanıcıya gösteririz. gelen verilerin tamamını geriye döndürürüz.
     
+#Sadece Giriş Yapan Kullanıcının Ürünlerini Getiren Get/Product Endpointi
 
+@router.get("/my", response_model=list[ProductOut])
+def get_my_products(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    products = db.query(Product).filter(
+        Product.company_id == current_user.company_id,
+        Product.stock > 0  
+    ).all()
+    return products

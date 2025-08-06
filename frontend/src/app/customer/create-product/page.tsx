@@ -9,7 +9,7 @@ export default function CreateProductPage() {
     description: "",
     price: "",
     stock: "",
-    type: "product",
+    type: "PRODUCT",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

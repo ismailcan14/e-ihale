@@ -30,7 +30,7 @@ def get_db():
 #response_model ile istek sonrası dönen kayıtta hangi veriler tutulacak onu AuctionOut da belirliyoruz. kısaca istediğimiz verileri geriye döndürüyoruz.
 def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
     #gelen veriler AuctionCreate modeline göre bekleniyor ve auction_data da tutuluyor. db ile veritabanı oturumunu başlatıyoruz.
-    product = db.query(Product).filter(Product.id == auction_data.product_id).first()
+    product = db.query(Product).filter(Product.id == auction_data.product_id,Product.company_id==current_user.company_id).first()
     #product adında bir değişken oluşturup Product tablosunda gelen ürünün id sinde bir ürün varmı diye kontrol ediyoruz
     if not product:
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")

@@ -6,6 +6,7 @@ from app.database import SessionLocal
 from app.models.auction import Auction
 from app.models.bid import Bid
 from app.models.auction import Auction, AuctionStatus
+from app.models.product import Product
 
 
 scheduler = BackgroundScheduler()
@@ -52,6 +53,12 @@ def deactivate_auctions_and_select_winner():
 
         if winning_bid:
             auction.winner_id = winning_bid.supplier.id
+
+            
+            product = db.query(Product).filter(Product.id == auction.product_id).first()
+            if product and product.stock > 0:
+             product.stock -= 1
+        
 
     db.commit()
     db.close()
