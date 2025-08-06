@@ -35,6 +35,8 @@ export default function FinishedAuctionDetailPage() {
       });
   }, [id, auction?.auction_type]);
 
+  
+
   if (!auction) return <p className="text-center text-gray-500">Yükleniyor...</p>;
 
   const formatTime = (time: string) =>
@@ -53,6 +55,45 @@ export default function FinishedAuctionDetailPage() {
           <p><span className="font-medium">Tip:</span> {auction.auction_type === "highest" ? "En Yüksek" : "En Düşük"}</p>
           <p><span className="font-medium">Başlangıç Fiyatı:</span> {auction.starting_price} ₺</p>
           <p><span className="font-medium text-green-700">Kapanış Fiyatı:</span> {auction.current_price} ₺</p>
+
+        <button
+  onClick={() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("PDF indirilemedi: Giriş yapılmamış.");
+      return;
+    }
+
+    fetch(`http://127.0.0.1:8000/reports/${id}/report-pdf`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Rapor indirilemedi: ${res.status}`);
+        }
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `ihale_${id}_raporu.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((err) => {
+        console.error("PDF indirme hatası:", err);
+        alert("PDF indirilemedi. Yetki eksik veya sistemsel bir hata oluştu.");
+      });
+  }}
+  className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+>
+  Raporu PDF Olarak İndir
+</button>
+
+
         </div>
 
         <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">

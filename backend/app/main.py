@@ -8,7 +8,7 @@ from .database import Base, engine
 from . import models
 #kendi projenin modelinde bulunan tabloları bu sayfaya tanıtır.
 
-from .routers import company_router,user_router,product_router,auction_router,bid_router,websocket_router
+from .routers import company_router,user_router,product_router,auction_router,bid_router,websocket_router,report_router
 #company routerını main sayfamıza tantıyıoruz.
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +27,7 @@ app.include_router(product_router.router)
 app.include_router(auction_router.router)
 app.include_router(bid_router.router)
 app.include_router(websocket_router.router)
+app.include_router(report_router.router)
 
 
 Base.metadata.create_all(bind=engine)
