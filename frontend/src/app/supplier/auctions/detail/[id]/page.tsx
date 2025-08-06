@@ -5,16 +5,26 @@ import { useParams } from "next/navigation";
 import { BoltIcon } from "@heroicons/react/24/solid";
 
 export default function AuctionDetailPage() {
-  const { id } = useParams(); //Urldeki id bilgisini id adlı değişkene atıyoruz
+  const { id } = useParams(); //Urldeki id bilgisini id adlı değişkene atıyoruz(auction id)
   const [auction, setAuction] = useState<any>(null);
   const [bids, setBids] = useState<any[]>([]);
   const [amount, setAmount] = useState<number | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null); //kullanıcının id si
 
 
   useEffect(() => {
     const token = localStorage.getItem("token"); //token bilgisini localStorage den çekiyoruz
+
+    fetch("http://127.0.0.1:8000/users/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      setCurrentUserId(data.id);
+    })
+    .catch((err) => console.error("Kullanıcı ID alınamadı:", err));
 
     fetch(`http://127.0.0.1:8000/auctions/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -37,13 +47,37 @@ export default function AuctionDetailPage() {
 
     setWs(socket);
 
-    socket.onmessage = (event) => { //Sunucudan bir mesaj geldiğinde bu satır otomatik olarak calısır.
-      const newBid = JSON.parse(event.data); //Sunucudan gelen json formatındaki veriyi javascripts nesnesine çevirip newBid adlı değişkene atıyoruz.
-      setBids((prev) => [newBid, ...prev]); //ile mesajda gelen değerleri teklifleri tutan state e yolluyoruz. state güncellendiği zaman react anlıyor ki benim frontendi güncellemem lazım ve frontendi güncelliyor. 
-      setAuction((prev) =>
-        prev ? { ...prev, current_price: newBid.amount } : prev
-      ); //ihale  objesinin sadece current_price ini güncelliyoruz.
-    };
+   socket.onmessage = (event) => { //Sunucudan bir mesaj geldiğinde bu satır otomatik olarak calısır.
+
+  const message = JSON.parse(event.data); //Sunucudan gelen json formatındaki veriyi javascripts nesnesine çevirip newBid adlı değişkene atıyoruz.
+
+  if (message.type === "toggle_visibility") {
+    // Eğer müşteri teklif görünürlüğünü değiştirdiyse sadece auction is_public_bids alanını güncelle
+    setAuction((prev) =>
+  prev
+    ? {
+        ...prev,
+        is_public_bids: message.is_public_bids,
+        current_price: prev.current_price, // mevcut fiyatı da koruyalım
+        product: prev.product, // ürünü de koruyalım
+      }
+    : prev
+);
+  } else {
+    const newBid = message;
+    setBids((prev) => [newBid, ...prev]); //ile mesajda gelen değerleri teklifleri tutan state e yolluyoruz. state güncellendiği zaman react anlıyor ki benim frontendi güncellemem lazım ve frontendi güncelliyor. 
+    setAuction((prev) =>
+      prev
+        ? {
+            ...prev,
+            current_price: newBid.amount,
+            is_public_bids: newBid.is_public_bids ?? prev.is_public_bids,
+          }
+        : prev
+    ); //ihale  objesinin sadece current_price ini güncelliyoruz.
+  }
+};
+
 
     return () => socket.close(); //cleanup fonksiyonudur sayfa değişirse veya id değişirse otomatık olarak websocket bağlantısını kapatır.
   }, [id]);
@@ -89,7 +123,6 @@ const handleBid = async () => {
     const data = await res.json(); //dönen kaydı json formatına çevirip data adlı nesnede tutuyoruz.
     setAmount(null);
     setError(null); // hata geçmişse temizle
-    console.log("Teklif verildi:", data);
 
   } catch (err) {
     setError("Sunucu hatası. Lütfen tekrar deneyin.");
@@ -114,7 +147,11 @@ const handleBid = async () => {
             <span className="font-medium text-green-700">Güncel Fiyat:</span>{" "}
             {new Intl.NumberFormat("tr-TR").format(auction.current_price)} ₺
           </p>        
-      </div>
+          <p className="text-sm text-gray-500">
+          Görünürlük durumu (is_public_bids):{" "}
+          <strong>{auction?.is_public_bids ? "Açık" : "Gizli"}</strong>
+        </p>
+        </div>
         <div className="flex gap-2 mb-8 flex-col">
   {error && (
     <div className="text-red-600 font-medium">
@@ -142,19 +179,23 @@ const handleBid = async () => {
           Canlı Teklifler
         </h2>
 
-        <ul className="space-y-3">
-          {bids.map((bid) => (
-            <li key={bid.id} className="bg-gray-100 p-4 rounded-lg shadow-sm border border-gray-200">
-              <div className="text-lg font-semibold text-gray-800">{bid.amount} ₺</div>
-              <div className="text-sm text-gray-500">
-                {new Date(bid.timestamp).toLocaleTimeString()}
-              </div>
-              <div className="text-sm text-gray-700 mt-1 italic">
-              {`${bid.user_info.company} şirketinden ${bid.user_info.name} (${bid.user_info.role})`}
-              </div>
-            </li>
-          ))}
-        </ul>
+  <ul className="space-y-3">
+  {bids.map((bid) => {
+    const canSee = auction.is_public_bids || bid.supplier_id === currentUserId;
+    if (!canSee) return null;
+
+    return (
+      <li key={bid.id} className="bg-gray-100 p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="text-lg font-semibold text-gray-800">{bid.amount} ₺</div>
+        <div className="text-sm text-gray-500">{new Date(bid.timestamp).toLocaleTimeString()}</div>
+        <div className="text-sm text-gray-700 mt-1 italic">
+          {`${bid.user_info.company} şirketinden ${bid.user_info.name} (${bid.user_info.role})`}
+        </div>
+      </li>
+    );
+  })}
+</ul>
+
       </div>
     </div>
   );
