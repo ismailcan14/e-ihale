@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app.schemas.user_schema import UserCreate, UserOut, UserRegisterCreate
+from app.schemas.user_schema import UserCreate, UserDetailOut, UserOut, UserRegisterCreate, UserUpdate
 from app.database import SessionLocal
 from app.models.user import User
 from app.utils import ALGORITHM, SECRET_KEY, create_access_token, hash_password, verify_password
 from jose import JWTError, jwt
+from sqlalchemy.orm import joinedload
 
 
 
@@ -93,9 +94,14 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user # kullanıcı geri döndürülür.
 
 #Giriş yapan kullanıcıyı döndüren endpoint
-@router.get("/me", response_model=UserOut)
-def read_current_user(current_user: User = Depends(get_current_user)):
-    return current_user
+@router.get("/me", response_model=UserDetailOut)
+def read_current_user(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # joinedload ile role ilişkisini getir
+    user = db.query(User).options(joinedload(User.role)).filter(User.id == current_user.id).first()
+    return user
 
 #KULLANICI EKLEME
 @router.post("/add-user", response_model=UserOut) #dönüş değeri olarak UserOut şablonu örnek alınacak. yani UserOut da hangi değerler varsa sadece o değerler döndürülecek.
@@ -129,3 +135,95 @@ def add_user(
     #veritabanına eklemeye hazır hale gitirip commit ile gerçek olarak ekleme ve refresh ile get_time id gibi sonradan gelen verileri new_user nesnemize atıp bu nesneyi geri döndürüyoruz.
 
     return new_user
+
+#Şirkete Ait Kullanıcıları Getiren Endpoint
+@router.get("/by-company", response_model=list[UserDetailOut])
+def get_users_by_company(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    users = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.company_id == current_user.company_id)
+        .all()
+    )
+    #User tablosundaki company id ile giriş yapan kullanıcının company id si ile eşleşen tüm kayıtları getir.
+    return users
+
+
+#Id ye Göre Kullanıcıyı Getiren Endpoint
+@router.get("/{user_id}", response_model=UserDetailOut)
+def get_user_by_id(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    user = (
+        db.query(User)
+        .options(joinedload(User.role))
+        #ms sqlden bildiğimiz inner join mantığı ile çalışıyor. ilişkili tablolarda beraber kayıt getirmek için kullanıyoruz.
+        #sql sorugusu ile yazdıgımızda : select*from User join Role on Users.role_id=roles_id where users.id=(parametreden gelen id)
+        .filter(User.id == user_id)
+        .first()
+    )
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+
+    if user.company_id != current_user.company_id:
+        raise HTTPException(status_code=403, detail="Bu kullanıcıya erişim izniniz yok")
+
+    return user
+
+
+#User Güncelleme (Put) Endpointi
+@router.put("/{user_id}", response_model=UserDetailOut)
+def update_user(
+    user_id: int,
+    updated_data: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    #fonksiyon parametre olarak id, güncel user kaydının bulundugu nesne, veritabanı baglantısı ıcn db nesnesi ve giriş yapan kullanıcının bilgilerini tutan nesneyi alıyor.
+    user_to_update = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.id == user_id)
+        .first()
+    )
+#Güncellenecek kaydı role bilgisi ile beraber veritabanından çekiyoruz
+
+    if not user_to_update:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+
+    if current_user.role.name == "admin":
+        pass
+    elif current_user.role.name == "müdür":
+        if user_to_update.role.name == "admin":
+            raise HTTPException(status_code=403, detail="Müdür admini güncelleyemez")
+    elif current_user.role.name == "personel":
+        if current_user.id != user_to_update.id:
+            raise HTTPException(status_code=403, detail="Sadece kendi bilgilerinizi güncelleyebilirsiniz")
+    else:
+        raise HTTPException(status_code=403, detail="Yetkisiz erişim") 
+    #Yetki Kontrolleri ! Bunu suan kullanmıyorum frontda yetki kontrolünü sağlıyorum ileride belki aktif ederim***
+
+    update_data = updated_data.dict(exclude_unset=True)
+    #update_data adlı nesnemizde formdan gelen güncel değerlerin bulunduğu kayıt bulunuyordu. bunu dict ile python sözlüğüne çeviriyoruz ve exclude_unset=true ile nesne de doldurulmayan alanları yok gibi sayıyoruz. örnek olarak kullanıcı adı güncelledi ancak formda email kısmı boş nesnemizde o alanı yokmuş gibi sayıoruz.
+
+    if "password" in update_data and update_data["password"]:
+        update_data["password"] = hash_password(update_data["password"])
+        #password alanı nesnede var mı ve varsa dolu mu ? diye kontrol edip if in içerisine girerse nesnedeki password alanını hashliyoruz. 
+    elif "password" in update_data:
+        update_data.pop("password")  
+        #password alanı varsa ancak boş ise update_data nesnesinden pop ile çıkartıyoruz.
+        
+    for key, value in update_data.items():
+        setattr(user_to_update, key, value)
+
+    db.commit()
+    db.refresh(user_to_update)
+    #Gelen her alan için veritabanı nesnesinin ilgili alanları güncellenir. ve veritabanına yazdırılır. ardından refresh ile kaydın son hali geri döndürülür.
+
+    return user_to_update

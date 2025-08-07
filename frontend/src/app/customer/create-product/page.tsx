@@ -54,13 +54,13 @@ export default function CreateProductPage() {
     <div className="bg-white flex items-start justify-center pt-[72px] px-4 pb-10">
       <div className="w-full max-w-md bg-white border border-gray-300 rounded-xl p-6">
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-5 flex items-center justify-center gap-2">
-          <FaPlus className="text-blue-600" /> Yeni Ürün Oluştur
+          <FaPlus className="text-blue-600" /> Yeni Ürün-Hizmet Oluştur
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-gray-800">
           <div>
             <label className="font-semibold mb-1 flex items-center gap-2">
-              <FaBoxOpen /> Ürün Adı
+              <FaBoxOpen /> Ürün-Hizmet Adı
             </label>
             <input
               type="text"

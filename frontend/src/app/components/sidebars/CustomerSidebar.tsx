@@ -17,9 +17,11 @@ const menuItems = [
     { path: "/customer/auctions/finished", label: "Bitmiş", roles: ["admin", "müdür", "personel"], key: "finished" },
   ],
 },
-  { path: "/customer/create-product", label: "Ürün ve Hizmet Ekleme", roles: ["admin","müdür"] },
-  { path: "/customer/products-services", label: "Ürün Ve Hizmetlerim", roles: ["admin", "müdür"] },
+  { path: "/customer/create-product", label: "Ürün ve Hizmet Ekleme", roles: ["admin","müdür","personel"] },
+  { path: "/customer/products-services", label: "Ürün Ve Hizmetlerim", roles: ["admin", "müdür","personel"] },
   { path: "/customer/add-employee", label: "Çalışan Ekle", roles: ["admin"] }, 
+  { path: "/customer/employees", label: "Çalışanlar", roles: ["admin","müdür","personel"] }, 
+
 ];
 
 // path tıklandığında açılacak sayfanın yolunu label tıklanan yazıyı roles ise hangi rollerde bu özelliğin gözükeceğini ifade eder.
