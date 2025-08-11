@@ -121,6 +121,16 @@ export default function LoginPage() {
             Giriş Yap
           </button>
         </form>
+        <div className="mt-4 text-center">
+            <span className="text-gray-600">Hesabınız yok mu? </span>
+            <button
+              type="button"
+              onClick={() => router.push("/register")}
+              className="text-[#1561ad] hover:underline font-semibold"
+            >
+              Kayıt Ol
+            </button>
+        </div>
       </div>
     </div>
   );
