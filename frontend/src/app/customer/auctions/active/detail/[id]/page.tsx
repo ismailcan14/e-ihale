@@ -1,8 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { BoltIcon } from "@heroicons/react/24/solid";
+
+//Fonksiyonun genel amacı bir ihaleye herhangi bir şirket tarafından gelen tekliflerden ihale tipine göre en yükseğini veya en düşüğünü seçmesi.
+function pickBestPerSupplier(list: any[], auctionType: 'highest' | 'lowest' = 'highest') {
+  //parametre olarak tüm teklifleri tutan bir liste ve ihalenin türünü tutan bir değişkene sahip
+  const bySupplier = new Map<number, any>();
+
+  for (const b of list) { //gelen teklifler kadar dönecek bir for döngüsü oluşturuyoruz.
+    const supplierId = b.supplier_id
+    //b.user_info?.id ??
+     //b.user_id; 
+      //Tedarikçi id yi gelen tekliflerden hangi teklif kimin olduğunu bilmek için supplier_id bilgisini alıyoruz.
+
+    if (!supplierId) continue; //boş değilse devam ediyoruz
+
+    const existing = bySupplier.get(supplierId); //bySuplier bir map(key-value) yapısı ve bu yapıda key tedarikçi id sini tutarken value ise şuana kadar görülen en iyi değer. biz bu yapıda supplierId idsinde(keyinde) bir kayıt var mı diye bakıyoruz. varsa existing değişkenine atıyoruz.
+    if (!existing) { //existinge bir değer atılmadıysa yani boşsa if in içerisindeki kod çalışıyor ve bu map(key-value) yapısına id ile o id nin teklif değerini kaydediyoruz.
+      bySupplier.set(supplierId, b); //bu tedarikçi için artık en iyi teklif bu.
+      continue;//direkt diper teklife geç aşağıdaki kıyaslamaları yapmaya gerek yok.
+    }
+   //eğer existing değeri varsa yani o id de başka bir teklif daha varsa aşağısı çalışıyor.
+    const bTime = new Date(b.timestamp).getTime(); //şuanki teklifin verilme zamanını alıyoruz
+    const eTime = new Date(existing.timestamp).getTime(); //existingdeki teklifin verilme zamanını alıyoruz
+
+    let isBetter = false;
+    if (auctionType === 'highest') {
+      isBetter = b.amount > existing.amount || (b.amount === existing.amount && bTime > eTime);
+    } else {
+      isBetter = b.amount < existing.amount || (b.amount === existing.amount && bTime > eTime);
+    } //highest ve lowest a göre örnek olarak highest olsun şaun incelenen teklif existing de tutulan  yani map deki teklifden büyük mü veya o teklife eşitse zaman olarak hangisi daha yeni kontrol ediyoruz. büyükse veya teklif yeniyse isBetter true oluyor. aynı mantık lowest içinde çalışıyor küçükse  veya eşit ise daha yeni mi diye kontrol ediliyor eğer öyleyse isBetter true oluyor.
+
+    if (isBetter) bySupplier.set(supplierId, b); //isBetter true oldugunda kontrol edilen teklif map e atılıyor. artık o idnin yeni teklifi şuan kontrol edilen teklif. 
+  }
+  //For döngüsü ile bu şekilde tüm teklifler taranıyor ve id lere göre en iyi teklifler map de tutuluyor.
+
+  const result = Array.from(bySupplier.values()); //map de bulunan valuelar(degerler) dizi formatına getirilip resul a aktarılıyor.
+  result.sort((a, b) =>
+    auctionType === 'highest' ? b.amount - a.amount : a.amount - b.amount
+  ); //burada da ihale tipine göre result dizisinin içerisindeki değerler sıralanıyor. eğer highest ise büyükten küçüğe sırala lowest ise küçükten büyüğe sırala
+  return result; //dizinin son halini döndürüyoruz.
+}
 
 export default function CustomerAuctionDetailPage() {
   const { id } = useParams();
@@ -90,6 +130,11 @@ const getColorForCompany = (companyName: string) => {
 
   }, [id]);
 
+  const bestBids = useMemo(() => {
+    if (!auction) return [];
+    return pickBestPerSupplier(bids, auction.auction_type);
+  }, [bids, auction]);
+  //normalde sayfada her state değiştiğinde tüm kodlar yeniden render edilir ve bizim pickBestPerSupplier fonksiyonumuz yeniden çalışır. bu fonksiyon bir tık ağır bir fonksiyon çünkü tüm teklifleri tek tek çekiyor kontrol ediyor yani maaliyetli biz useMemo() kullanarak react a diyoruz ki pickBestPerSupplier fonksiyonumuzu sadece auction ve bids değiştiğinde çağır. aksi halde bu fonksiyonun önceki değerini hafızandan getir. bu sayede performans kaybı yaşamıyoruz.
   if (!auction) return <p className="text-center text-gray-500">Yükleniyor...</p>;
 
   return (
@@ -142,7 +187,7 @@ const getColorForCompany = (companyName: string) => {
         </h2>
 
         <ul className="space-y-3">
-          {bids.map((bid) => {
+          {bestBids.map((bid) => {
             if (!bid.user_info) return null;
 
             return (

@@ -1,8 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { BoltIcon } from "@heroicons/react/24/solid";
+
+
+//*** BU FONKSYİONUN TÜM AÇIKLAMASI CUSTOMER/AUCTİONS/ACTİVE/DETAİL SAYFASINDA MEVCUT ***//
+function pickBestPerSupplier(list: any[], auctionType: 'highest' | 'lowest' = 'highest') {
+  const bySupplier = new Map<number, any>();
+  for (const b of list) {
+    const supplierId = b.supplier_id ?? b.user_info?.id ?? b.user_id;
+    if (!supplierId) continue;
+    const existing = bySupplier.get(supplierId);
+    if (!existing) {
+      bySupplier.set(supplierId, b);
+      continue;
+    }
+    const bTime = new Date(b.timestamp).getTime();
+    const eTime = new Date(existing.timestamp).getTime();
+    let isBetter = false;
+    if (auctionType === 'highest') {
+      isBetter = b.amount > existing.amount || (b.amount === existing.amount && bTime > eTime);
+    } else {
+      isBetter = b.amount < existing.amount || (b.amount === existing.amount && bTime > eTime);
+    }
+    if (isBetter) bySupplier.set(supplierId, b);
+  }
+  const result = Array.from(bySupplier.values());
+  result.sort((a, b) => (auctionType === 'highest' ? b.amount - a.amount : a.amount - b.amount));
+  return result;
+}
 
 export default function AuctionDetailPage() {
   const { id } = useParams(); //Urldeki id bilgisini id adlı değişkene atıyoruz(auction id)
@@ -42,7 +69,7 @@ export default function AuctionDetailPage() {
     const socket = new WebSocket(
       `ws://localhost:8000/auctions/ws/${id}?token=${token}`
     );
-    //ardından socket adında bir WebSocket nesnesi oluşturuyoruz. yani kısaca bağlantı. bu bağlantıyı oluşturabilmek için aynı constructor mantıgı ile çalışıyor ve hemen bir bağlantı açmaya çalışır.
+    //ardı ndan socket adında bir WebSocket nesnesi oluşturuyoruz. yani kısaca bağlantı. bu bağlantıyı oluşturabilmek için aynı constructor mantıgı ile çalışıyor ve hemen bir bağlantı açmaya çalışır.
     //bu bir http isteği değil WebSocket handshake protokolüdür. Başarılı olursa sürekli açık bir bağlantı kurulur. 
 
     setWs(socket);
@@ -129,6 +156,12 @@ const handleBid = async () => {
   }
 };
 
+//*** BU YAPININ TÜM AÇIKLAMASI CUSTOMER/AUCTİONS/ACTİVE/DETAİL SAYFASINDA MEVCUT ***//
+  const visibleBids = useMemo(() => {
+    if (!auction) return [];
+    const base = bids.filter((b) => auction.is_public_bids || b.supplier_id === currentUserId);
+    return pickBestPerSupplier(base, auction.auction_type);
+  }, [bids, auction, currentUserId]);
 
   if (!auction) return <p className="text-center text-gray-500">Yükleniyor...</p>;
 
@@ -180,11 +213,7 @@ const handleBid = async () => {
         </h2>
 
   <ul className="space-y-3">
-  {bids.map((bid) => {
-    const canSee = auction.is_public_bids || bid.supplier_id === currentUserId;
-    if (!canSee) return null;
-
-    return (
+  {visibleBids.map((bid) => (
       <li key={bid.id} className="bg-gray-100 p-4 rounded-lg shadow-sm border border-gray-200">
         <div className="text-lg font-semibold text-gray-800">{bid.amount} ₺</div>
         <div className="text-sm text-gray-500">{new Date(bid.timestamp).toLocaleTimeString()}</div>
@@ -192,8 +221,7 @@ const handleBid = async () => {
           {`${bid.user_info.company} şirketinden ${bid.user_info.name} (${bid.user_info.role})`}
         </div>
       </li>
-    );
-  })}
+    ))}
 </ul>
 
       </div>

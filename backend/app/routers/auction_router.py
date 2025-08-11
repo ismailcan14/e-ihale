@@ -6,7 +6,7 @@ from datetime import timezone
 
 from app.database import SessionLocal
 from app.models.auction import Auction, AuctionStatus
-from app.models.product import Product
+from app.models.product import Product, ProductType
 from app.schemas.auction_schema import AuctionCreate, AuctionOut,AuctionUpdate
 from app.models.user import User
 from app.routers.user_router import get_current_user
@@ -37,10 +37,10 @@ def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db),cu
     #Ürün yoksa hata mesajı döndürüyoruz.
 
     #Gelen ürünün tipine göre ihalenin türünü belirliyoruz.(Bu sonradan değiştirdiğim bir özellik ürün tipi seçildiğinde ihale tipi de otomatik seçilecek.)
-    if product.type == "product":
+    if product.type == ProductType.PRODUCT:
      auction_type = "highest"
-    elif product.type == "service":
-        auction_type = "lowest"
+    elif product.type == ProductType.SERVICE:
+     auction_type = "lowest"
     else:
         raise HTTPException(status_code=400, detail="Geçersiz ürün tipi")
 
