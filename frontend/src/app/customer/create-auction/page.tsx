@@ -31,6 +31,27 @@ export default function CreateAuctionPage() {
   };
   //inputların veya selectlerin herhangi birinde bir değişiklik olduğu zaman tetiklenecek fonksiyonu oluşturduk. burada hangi inputta veya selectte bir değişiklik olduysa event nesnesi olan e ile fonksiyona parametre olarak geliyor ve e nin üzerinden hangi targe.name e sahip inputun veya selectin değerini value sunun son halini elde ediyoruz ve ...formData ile formData nın kopyasını oluşturup kopya üzerine diğerlerine dokunmadan sadece güncellenen değeri ekliyoruz. Kopyası oluşan formData değişikliği farkediyor ve kendini kopyasına göre güncelliyor. Ardından input veya selecttedi deker formData dan value sunu çekip son haline geliyor.
 
+  // product_id değişince auction_type ı otomatik olarak belirle
+  useEffect(() => {
+    if (!formData.product_id) return;
+
+    const selectedProduct = products.find(
+      p => String(p.id) === String(formData.product_id)
+    );
+
+    if (!selectedProduct) return;
+
+    const auctionType =
+      selectedProduct.type?.toUpperCase() === "SERVICE" ? "lowest" : "highest";
+
+    if (formData.auction_type !== auctionType) {
+      setFormData(prev => ({
+        ...prev,
+        auction_type: auctionType,
+      }));
+    }
+  }, [formData.product_id, products]);
+
   // Yerel zamanı UTC'ye çevir (timezone offset ile)
   const toUtcISOString = (local: string) => {
     const localDate = new Date(local);
@@ -156,6 +177,7 @@ return (
             onChange={handleChange}
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            disabled
           >
             <option value="highest">En Yüksek Teklif Kazanır</option>
             <option value="lowest">En Düşük Teklif Kazanır</option>

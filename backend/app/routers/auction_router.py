@@ -36,6 +36,14 @@ def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db),cu
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")
     #Ürün yoksa hata mesajı döndürüyoruz.
 
+    #Gelen ürünün tipine göre ihalenin türünü belirliyoruz.(Bu sonradan değiştirdiğim bir özellik ürün tipi seçildiğinde ihale tipi de otomatik seçilecek.)
+    if product.type == "product":
+     auction_type = "highest"
+    elif product.type == "service":
+        auction_type = "lowest"
+    else:
+        raise HTTPException(status_code=400, detail="Geçersiz ürün tipi")
+
     existing = db.query(Auction).filter(
     Auction.product_id == product.id,
     Auction.status == AuctionStatus.ACTIVE
@@ -58,7 +66,7 @@ def create_auction(auction_data: AuctionCreate, db: Session = Depends(get_db),cu
     auction = Auction(
         product_id=auction_data.product_id,
         company_id=current_user.company_id,
-        auction_type=auction_data.auction_type, #ihale tipi
+        auction_type=auction_type, #ihale tipi(Bunu kendimiz burada manuel olarak yaptık çünkü kullanıcı frontendde select inputunu değiştiremese bile payloadı değiştirip bize yollayabilir ve bu bir güvenlik sorunu oluşturur. bu şekilde bunun önüne geçtik)
         start_time=auction_data.start_time or datetime.utcnow().replace(tzinfo=timezone.utc), #eğer zaman bilgisi girilmişse onu kullanır boş ise şimdiki zamanın utc formatında damgalanmış halini kullanır.
         end_time=auction_data.end_time,
         starting_price=auction_data.starting_price,
