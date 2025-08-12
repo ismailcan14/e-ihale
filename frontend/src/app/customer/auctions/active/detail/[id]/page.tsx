@@ -3,11 +3,12 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { BoltIcon } from "@heroicons/react/24/solid";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 //Fonksiyonun genel amacı bir ihaleye herhangi bir şirket tarafından gelen tekliflerden ihale tipine göre en yükseğini veya en düşüğünü seçmesi.
 function pickBestPerSupplier(list: any[], auctionType: 'highest' | 'lowest' = 'highest') {
-  //parametre olarak tüm teklifleri tutan bir liste ve ihalenin türünü tutan bir değişkene sahip
-  const bySupplier = new Map<number, any>();
+  //parametre olarak tüm teklifleri tutan bir obje listesi ve ihalenin türünü tutan bir değişkene sahip
+  const bySupplier = new Map<number, any>(); //key ve value tutan bir map yapısı oluşturuyoruz.
 
   for (const b of list) { //gelen teklifler kadar dönecek bir for döngüsü oluşturuyoruz.
     const supplierId = b.supplier_id
@@ -35,13 +36,13 @@ function pickBestPerSupplier(list: any[], auctionType: 'highest' | 'lowest' = 'h
 
     if (isBetter) bySupplier.set(supplierId, b); //isBetter true oldugunda kontrol edilen teklif map e atılıyor. artık o idnin yeni teklifi şuan kontrol edilen teklif. 
   }
-  //For döngüsü ile bu şekilde tüm teklifler taranıyor ve id lere göre en iyi teklifler map de tutuluyor.
+  //For döngüsü ile bu şekilde tüm teklifler taranıyor ve id lere göre en iyi tekliflerin bulunduğu bids objeleri map de tutuluyor.
 
-  const result = Array.from(bySupplier.values()); //map de bulunan valuelar(degerler) dizi formatına getirilip resul a aktarılıyor.
+  const result = Array.from(bySupplier.values()); //map de bulunan valuelar(degerler) dizi formatına getirilip result a aktarılıyor.
   result.sort((a, b) =>
     auctionType === 'highest' ? b.amount - a.amount : a.amount - b.amount
   ); //burada da ihale tipine göre result dizisinin içerisindeki değerler sıralanıyor. eğer highest ise büyükten küçüğe sırala lowest ise küçükten büyüğe sırala
-  return result; //dizinin son halini döndürüyoruz.
+  return result; //dizinin son halini döndürüyoruz. dizinin son hali ise bids objelerinden oluşan bir dizi. bu objelerin içerisinde zaten supplier_id var o yüzden onları çıkardık gerek yok.
 }
 
 export default function CustomerAuctionDetailPage() {
@@ -135,6 +136,38 @@ const getColorForCompany = (companyName: string) => {
     return pickBestPerSupplier(bids, auction.auction_type);
   }, [bids, auction]);
   //normalde sayfada her state değiştiğinde tüm kodlar yeniden render edilir ve bizim pickBestPerSupplier fonksiyonumuz yeniden çalışır. bu fonksiyon bir tık ağır bir fonksiyon çünkü tüm teklifleri tek tek çekiyor kontrol ediyor yani maaliyetli biz useMemo() kullanarak react a diyoruz ki pickBestPerSupplier fonksiyonumuzu sadece auction ve bids değiştiğinde çağır. aksi halde bu fonksiyonun önceki değerini hafızandan getir. bu sayede performans kaybı yaşamıyoruz.
+
+  const bestBidsChartData = useMemo(() => {
+    return bestBids.map((b) => ({ //her şirketin en iyi tekliflerini tutan bestBids dizisini grafik formatına çeviriyoruz. Çünkü bestBids dizisinde bids objeleri bulunuyordu bunları ayırıp grafikte göstermektense biz bu objelerden şirket adı ve o şirketin teklifini alıp yeni bir dizi haline getiriyoruz. bu dizide 2 değer var artık company ve amount.
+      company: b.user_info?.company ?? `#${b.supplier_id ?? b.user_info?.id ?? b.user_id}`, //varsa şirket adı yoksa id alıyoruz
+      amount: Number(b.amount),//string gelebilecek teklifleri number veri tipine çeviriyoruz.
+    }));
+  }, [bestBids]); //bestBids değiştiğinde tetiklen ve çalış
+  //bestBidsCharData, şirket adı ve bu şirkete ait en iyi teklifi tutan bir dizi oluyor.
+
+
+  const stats = useMemo(() => {
+    const supplierIds = new Set(
+      bids
+        .map((b) => b.supplier_id ?? b.user_info?.id ?? b.user_id)
+        .filter(Boolean) //tüm tekliflerin supplier_idlerini supplierIds değişkeninde tutuyoruz.
+    );
+    const supplierCount = supplierIds.size; //toplam tedarikçi
+    const totalBids = bids.length; //toplam teklif
+
+    const amounts = bestBids
+      .map((b) => Number(b.amount))
+      .filter((n) => !Number.isNaN(n)); //en iyi teklifler dizisinden teklifleri alıp number veri tipine çevirip boş null olanları atıyoruz.
+
+    const sum = amounts.reduce((a, c) => a + c, 0); //gelen toplam tekliflerin toplamı
+    const avg = amounts.length ? sum / amounts.length : 0; //gelen tekliflerin ortalaması
+    const min = amounts.length ? Math.min(...amounts) : 0; //gelen tekliflerin en azı
+    const max = amounts.length ? Math.max(...amounts) : 0; //gelen tekliflerin en çoğu
+
+    return { supplierCount, totalBids, avg, min, max }; //geriye tüm olusturdugumuz degerleri döndürüyoruz.
+  }, [bids, bestBids]);
+  //return kısmında stats ı kullanarak verileri kullanıcıya gösteriyoruz.
+
   if (!auction) return <p className="text-center text-gray-500">Yükleniyor...</p>;
 
   return (
@@ -179,6 +212,45 @@ const getColorForCompany = (companyName: string) => {
 </button>
 </div>
 
+        </div>
+
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-gray-50 border rounded-xl p-4">
+            <h3 className="font-semibold text-gray-800 mb-2">Özet</h3>
+            <ul className="text-sm text-gray-700 space-y-1">
+              <li>Toplam teklif: <span className="font-medium">{stats.totalBids}</span></li>
+              <li>Tedarikçi sayısı: <span className="font-medium">{stats.supplierCount}</span></li>
+              <li>Ortalama (şirket başı en iyi):{" "}
+                <span className="font-medium">
+                  {stats.avg ? stats.avg.toLocaleString("tr-TR") : 0} ₺
+                </span>
+              </li>
+              <li>
+                Min: <span className="font-medium">{stats.min ? stats.min.toLocaleString("tr-TR") : 0} ₺</span>{" "}
+                — Max: <span className="font-medium">{stats.max ? stats.max.toLocaleString("tr-TR") : 0} ₺</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-gray-50 border rounded-xl p-4">
+            <h3 className="font-semibold text-gray-800 mb-2">Şirket Bazında En İyi Teklif</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={bestBidsChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="company" hide={bestBidsChartData.length > 8} />
+                  <YAxis />
+                  <Tooltip formatter={(v: number) => `${Number(v).toLocaleString("tr-TR")} ₺`} />
+                  <Bar dataKey="amount" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            {bestBidsChartData.length > 8 && (
+              <p className="mt-2 text-xs text-gray-500">
+                Çok fazla şirket olduğu için eksen etiketleri gizlendi. Çubukların üzerine gelerek değerleri görebilirsiniz.
+              </p>
+            )}
+          </div>
         </div>
        
         <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
