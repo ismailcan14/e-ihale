@@ -111,7 +111,7 @@ export default function ActiveSupplierAuctionsPage() {
 
                 <button
                   onClick={() =>
-                    router.push(`/supplier/auctions/detail/${auction.id}`)
+                    router.push(`/supplier/auctions/active/detail/${auction.id}`)
                   }
                   className="mt-5 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
                 >

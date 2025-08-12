@@ -11,7 +11,7 @@ const menuItems = [
     roles: ["admin", "müdür","personel"],
     subItems: [
       { path: "/supplier/auctions/active", label: "Aktif İhaleler", roles: ["admin", "müdür"], key: "active" },
-      { path: "/supplier/auctions/finished", label: "Bitmiş İhaleler", roles: ["admin", "müdür"], key: "finished" },
+      { path: "/supplier/auctions/joined", label: "Katıldığım İhaleler", roles: ["admin", "müdür"], key: "finished" },
     ],
   },
   { path: "/supplier/bid-history", label: "Teklif Geçmişi", roles: ["admin", "müdür", "personel"] },

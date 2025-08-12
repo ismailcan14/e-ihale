@@ -11,6 +11,7 @@ from app.schemas.auction_schema import AuctionCreate, AuctionOut,AuctionUpdate
 from app.models.user import User
 from app.routers.user_router import get_current_user
 from app.routers.websocket_router import active_connections
+from app.models.bid import Bid
 
 router=APIRouter(
     prefix="/auctions",
@@ -191,6 +192,59 @@ async def toggle_public_bids(
             print("WebSocket gönderim hatası (toggle-public-bids):", e)
 
     return {"is_public_bids": auction.is_public_bids}
+
+
+# Katıldığım Aktif İhaleler
+@router.get("/joined/active", response_model=list[AuctionOut])
+def get_joined_active_auctions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    auction_ids = (
+        db.query(Bid.auction_id)
+        .filter(Bid.supplier_id == current_user.id)  # supplier_id kullandık
+        .distinct()
+        .all()
+    )
+    auction_ids = [a[0] for a in auction_ids] 
+
+    if not auction_ids:
+        return []
+
+    auctions = (
+        db.query(Auction)
+        .options(joinedload(Auction.product))
+        .filter(Auction.id.in_(auction_ids))
+        .filter(Auction.status == AuctionStatus.ACTIVE)
+        .all()
+    )
+    return auctions
+
+# Katıldığım Bitmiş İhaleler
+@router.get("/joined/finished", response_model=list[AuctionOut])
+def get_joined_finished_auctions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    auction_ids = (
+        db.query(Bid.auction_id)
+        .filter(Bid.supplier_id == current_user.id)  # supplier_id kullandık
+        .distinct()
+        .all()
+    )
+    auction_ids = [a[0] for a in auction_ids]
+
+    if not auction_ids:
+        return []
+
+    auctions = (
+        db.query(Auction)
+        .options(joinedload(Auction.product))
+        .filter(Auction.id.in_(auction_ids))
+        .filter(Auction.status == AuctionStatus.FINISHED)
+        .all()
+    )
+    return auctions
 
 
 
