@@ -178,8 +178,14 @@ const getColorForCompany = (companyName: string) => {
         </h1>
 
         <div className="grid grid-cols-2 gap-4 text-gray-700 mb-6">
-          <p><span className="font-medium">Başlangıç:</span> {new Date(auction.start_time).toLocaleString()}</p>
-          <p><span className="font-medium">Bitiş:</span> {new Date(auction.end_time).toLocaleString()}</p>
+          <p>
+            <span className="font-medium">Başlangıç:</span>{" "}
+            {new Date(new Date(auction.start_time).getTime() + 3 * 60 * 60 * 1000).toLocaleString()}
+          </p>
+          <p>
+            <span className="font-medium">Bitiş:</span>{" "}
+            {new Date(new Date(auction.end_time).getTime() + 3 * 60 * 60 * 1000).toLocaleString()}
+          </p>
           <p><span className="font-medium">İhale Türü:</span> {auction.auction_type === "highest" ? "En Yüksek" : "En Düşük"}</p>
           <p><span className="font-medium text-green-700">Güncel Fiyat:</span> {new Intl.NumberFormat("tr-TR").format(auction.current_price)} ₺</p>
 <div className="mb-8">
