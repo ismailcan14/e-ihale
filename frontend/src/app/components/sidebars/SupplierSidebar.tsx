@@ -11,6 +11,7 @@ const menuItems = [
     roles: ["admin", "müdür","personel"],
     subItems: [
       { path: "/supplier/auctions/active", label: "Aktif İhaleler", roles: ["admin", "müdür"], key: "active" },
+      { path: "/supplier/auctions/pending", label: "Gelecek İhaleler", roles: ["admin", "müdür"], key: "pending" },
       { path: "/supplier/auctions/joined", label: "Katıldığım İhaleler", roles: ["admin", "müdür"], key: "finished" },
     ],
   },
@@ -18,6 +19,7 @@ const menuItems = [
   { path: "/supplier/live-bidding", label: "Canlı Teklifler", roles: ["admin", "müdür", "personel"] },
   { path: "/supplier/reports", label: "Raporlar", roles: ["admin", "müdür"] },
   { path: "/supplier/add-employee", label: "Çalışan Ekle", roles: ["admin"] },
+  { path: "/supplier/employees", label: "Çalışanlar", roles: ["admin","müdür","personel"] },
 ];
 
 interface SupplierSidebarProps {

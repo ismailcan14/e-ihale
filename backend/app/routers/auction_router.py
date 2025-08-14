@@ -24,6 +24,12 @@ def get_db():
       yield db
     finally:
       db.close()
+#Tüm Bekleyen İhaleleri Getirme
+@router.get("/pending", response_model=list[AuctionOut])
+def get_pending_auctions(db: Session = Depends(get_db)):
+    return db.query(Auction)\
+        .filter(Auction.status == AuctionStatus.PENDING)\
+        .all()
 
 
 #İhale Oluşturma

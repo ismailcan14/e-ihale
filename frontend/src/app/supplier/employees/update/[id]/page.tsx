@@ -15,7 +15,7 @@ interface FormDataType {
   name: string;
   email: string;
   password: string;
-  role_id: number | string;
+  role_id: number | string; // Sayı veya string olabilir
 }
 
 export default function UpdateEmployeePage() {
@@ -99,7 +99,7 @@ export default function UpdateEmployeePage() {
     <div className="bg-white flex items-start justify-center pt-[72px] px-4 pb-10 min-h-screen">
       <div className="w-full max-w-md bg-white border border-gray-300 rounded-xl p-6 shadow-md">
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-5 flex items-center justify-center gap-2">
-          <FaUserTag className="text-blue-600" /> Çalışan Güncelle
+          <FaUserTag className="text-green-600" /> Çalışan Güncelle
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-gray-800">
@@ -112,7 +112,7 @@ export default function UpdateEmployeePage() {
               type="text"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
           </div>
@@ -126,7 +126,7 @@ export default function UpdateEmployeePage() {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
           </div>
@@ -141,36 +141,36 @@ export default function UpdateEmployeePage() {
               value={formData.password}
               onChange={handleChange}
               placeholder="Yeni şifre girin (değiştirmek için)"
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
             <p className="text-sm text-gray-500 mt-1">
               Şifreyi değiştirmek istemiyorsan boş bırak.
             </p>
           </div>
 
-            <div>
-              <label className="font-semibold mb-1 flex items-center gap-2">
-                <FaUserTag /> Rol
-              </label>
-              <select
-                name="role_id"
-                value={formData.role_id}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-                disabled={Number(formData.role_id) === 1}
-              >
-                {Number(formData.role_id) === 1 ? (
-                  <option value="1">Admin</option>
-                ) : (
-                  <>
-                    <option value="">Rol Seçin</option>
-                    <option value="2">Müdür</option>
-                    <option value="3">Personel</option>
-                  </>
-                )}
-              </select>
-            </div>
+           <div>
+      <label className="font-semibold mb-1 flex items-center gap-2">
+        <FaUserTag /> Rol
+      </label>
+      <select
+        name="role_id"
+        value={formData.role_id}
+        onChange={handleChange}
+        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+        required
+        disabled={Number(formData.role_id) === 1} // Admin ise değiştirilemez
+      >
+        {Number(formData.role_id) === 1 ? (
+          <option value="1">Admin</option>
+        ) : (
+          <>
+            <option value="">Rol Seçin</option>
+            <option value="2">Müdür</option>
+            <option value="3">Personel</option>
+          </>
+        )}
+      </select>
+    </div>
 
           <div className="flex justify-between gap-2">
             <button
@@ -183,7 +183,7 @@ export default function UpdateEmployeePage() {
 
             <button
               type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
             >
               <FaSave /> Kaydet
             </button>
