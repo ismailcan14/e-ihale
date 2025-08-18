@@ -8,9 +8,18 @@ from .database import Base, engine
 from . import models
 #kendi projenin modelinde bulunan tabloları bu sayfaya tanıtır.
 
-from .routers import company_router,user_router,product_router,auction_router,bid_router,websocket_router,report_router
-#company routerını main sayfamıza tantıyıoruz.
-
+from .routers import (
+    company_router,
+    user_router,
+    product_router,
+    auction_router,
+    bid_router,
+    websocket_router,
+    report_router,
+    conversation_router,
+)
+# ⬇️ DOSYA ADINA GÖRE DOĞRU IMPORT (conversation_ws_router.py)
+from app.routers import conversation_ws_router
 from fastapi.middleware.cors import CORSMiddleware
 #Cors ayarları için gerekli kütüphaneyi import ediyoruz
 
@@ -21,6 +30,7 @@ app = FastAPI()
 #Uygulamayı başlatır ve FastAPI classından app adında bir nesne oluşturur. Bundan sonra app.get() app.post() gibi tüm rotaları bu nesne üzerinden oluştururuz.
 
 ###
+# HTTP Routers
 app.include_router(company_router.router)
 app.include_router(user_router.router)
 app.include_router(product_router.router)
@@ -28,6 +38,10 @@ app.include_router(auction_router.router)
 app.include_router(bid_router.router)
 app.include_router(websocket_router.router)
 app.include_router(report_router.router)
+app.include_router(conversation_router.router)
+
+# WS Router (APIRouter değişkeni 'ws_router' olmalı)
+app.include_router(conversation_ws_router.ws_router)
 
 
 Base.metadata.create_all(bind=engine)

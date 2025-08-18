@@ -3,4 +3,5 @@ from .company import Company
 from .role import Role
 from .product import Product
 from .bid import Bid
-from .auction import Auction
+from .auction import Auction,AuctionStatus
+from .conversation import Conversation, ConversationParticipant, ConversationStatus,Message,MessageReceipt,MessageType
