@@ -12,6 +12,8 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts"; //kullandıgımız iconları import ettik
+import { useRouter } from "next/navigation";
+
 
 export default function FinishedAuctionDetailPage() {
   const { id } = useParams(); //urlden id yi aldık
@@ -19,8 +21,34 @@ export default function FinishedAuctionDetailPage() {
   const [bids, setBids] = useState<any[]>([]); //teklifleri çeken state
   const [loading, setLoading] = useState(true); //yükleniyor
   const [currentUserId, setCurrentUserId] = useState<number | null>(null); //giriş yapan kullanıcının id si
+  const router = useRouter();
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  const handleStartChat = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Giriş yapmanız gerekiyor.");
+    return;
+  }
+  try {
+    const r = await fetch(`http://127.0.0.1:8000/conversations/start`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ auction_id: Number(id) }),
+    });
+    if (!r.ok) throw new Error(await r.text());
+    const conv = await r.json();
+    router.push(`/customer/conversations/${conv.id}`); // 👈 bu sayfaya gider
+  } catch (e) {
+    console.error(e);
+    alert("Sohbet başlatılamadı. (Bitmiş ihale / yetki kontrolü)");
+  }
+};
+
 
   useEffect(() => {
     if (!token) return;
@@ -136,7 +164,6 @@ export default function FinishedAuctionDetailPage() {
   };
 
 
-
   if (loading) {
     return <div className="text-center mt-20 text-gray-800">Yükleniyor...</div>;
   }
@@ -194,12 +221,11 @@ export default function FinishedAuctionDetailPage() {
       </p>
       <button
         className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
-        onClick={() => {
-          console.log("İletişime Geç tıklandı (şimdilik pasif)");
-        }}
+        onClick={handleStartChat}
       >
         İletişime Geç
       </button>
+
     </div>
   ) : (
     <p className="text-gray-900">Kazanan bulunamadı.</p>

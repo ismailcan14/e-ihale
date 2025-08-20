@@ -7,6 +7,7 @@ import { useState } from "react";
 
 const menuItems = [
   { path: "/customer", label: "Profilim", roles: ["admin", "müdür", "personel"] },
+    { path: "/customer/messages", label: "Mesajlar", roles: ["admin", "müdür"] },
   { path: "/customer/create-auction", label: "Yeni İhale Oluştur", roles: ["admin", "müdür"] },
 {
   label: "İhalelerim",

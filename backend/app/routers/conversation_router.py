@@ -122,6 +122,126 @@ def serialize_conversation(conv: Conversation, last_msg: Message | None) -> dict
 #Bunları yapıyoruz çünkü ws bağlantısı için lazım.
 
 
+# ---------------------------
+# GET /conversations/my
+#   - Giriş yapan kullanıcının katılımcısı olduğu konuşmaları listeler
+#   - Her kalem: last_message + unread_count + karşı taraf bilgisi
+# ---------------------------
+@router.get("/my")
+def list_my_conversations(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # 1) Kullanıcının katıldığı konuşmalar
+    cps = (
+        db.query(ConversationParticipant)
+        .filter(ConversationParticipant.user_id == current_user.id)
+        .all()
+    )
+    if not cps:
+        return []
+
+    conv_ids = [cp.conversation_id for cp in cps]
+
+    # 2) Konuşmaları ve katılımcıları çek
+    conversations = (
+        db.query(Conversation)
+        .options(joinedload(Conversation.participants))
+        .filter(Conversation.id.in_(conv_ids))
+        .all()
+    )
+
+    # id -> participant (current_user için)
+    cp_by_conv = {cp.conversation_id: cp for cp in cps}
+
+    # 3) last_message + unread_count + counterparty bilgisi
+    items = []
+    for conv in conversations:
+        # last_message
+        last_msg = (
+            db.query(Message)
+            .filter(Message.conversation_id == conv.id)
+            .order_by(desc(Message.created_at))
+            .first()
+        )
+
+        # unread_count (last_read_message_id sonrası mesaj sayısı)
+        my_cp = cp_by_conv.get(conv.id)
+        if my_cp and my_cp.last_read_message_id:
+            unread_count = (
+                db.query(Message)
+                .filter(
+                    Message.conversation_id == conv.id,
+                    Message.id > my_cp.last_read_message_id,
+                )
+                .count()
+            )
+        else:
+            unread_count = (
+                db.query(Message)
+                .filter(Message.conversation_id == conv.id)
+                .count()
+            )
+
+        # karşı taraf (user + company)
+        other_cp = None
+        for p in conv.participants or []:
+            if p.user_id != current_user.id:
+                other_cp = p
+                break
+
+        counterparty = None
+        if other_cp:
+            # user ve şirket adını getir
+            other_user = db.query(User).filter(User.id == other_cp.user_id).first()
+            company_name = None
+            if other_user and other_user.company_id:
+                from app.models import Company  # import gerekiyorsa
+                comp = db.query(Company).filter(Company.id == other_user.company_id).first()
+                company_name = comp.name if comp else None
+
+            counterparty = {
+                "user_id": other_cp.user_id,
+                "role": other_cp.role,
+                "company_name": company_name,
+            }
+
+        # serialize payload
+        item = {
+            "id": conv.id,
+            "auction_id": conv.auction_id,
+            "status": conv.status.value if isinstance(conv.status, ConversationStatus) else conv.status,
+            "created_at": conv.created_at.isoformat() if conv.created_at else None,
+            "counterparty": counterparty,
+            "last_message": None,
+            "unread_count": unread_count,
+        }
+        if last_msg:
+            item["last_message"] = {
+                "id": last_msg.id,
+                "conversation_id": last_msg.conversation_id,
+                "sender_id": last_msg.sender_id,
+                "message_type": last_msg.message_type.value if isinstance(last_msg.message_type, MessageType) else last_msg.message_type,
+                "content": last_msg.content,
+                "attachment_url": last_msg.attachment_url,
+                "created_at": last_msg.created_at.isoformat() if last_msg.created_at else None,
+                "edited_at": last_msg.edited_at.isoformat() if last_msg.edited_at else None,
+                "deleted_at": last_msg.deleted_at.isoformat() if last_msg.deleted_at else None,
+            }
+
+        items.append(item)
+
+    # 4) last_message.created_at'e göre sırala (yoksa conv.created_at)
+    def _sort_key(x):
+        return x["last_message"]["created_at"] if x["last_message"] else x["created_at"]
+
+    items.sort(key=_sort_key, reverse=True)
+    return items[offset : offset + limit]
+
+
+
 #Konuşma Başlatma (POST) Endpointi
 @router.post("/start", response_model=ConversationOut)
 def start_conversation(
@@ -269,8 +389,8 @@ def list_messages(
             q = q.filter(Message.created_at > ref.created_at) #eğer öyle bir kayıt varsa o kayıttan daha yeni mesajlar q adlı değişkende tutulur.
 
     messages = q.order_by(asc(Message.created_at)).limit(limit).all()
-    return messages 
-    #q değişkenindeki kayıtlar oluşturulma zamanına göre sıralanır ve belirtilen limit kadarı messages adlı değişkene aktarılır. ardından geri döndürülür.
+    payload = [serialize_message(m) for m in messages]
+    return JSONResponse(content=jsonable_encoder(payload))
 
 
 #Mesaj oluşturma ve ws ile yayınlama
@@ -346,3 +466,6 @@ def post_read_receipt(
     participant.last_read_message_id = payload.last_read_message_id #katılımcı kaydındaki last_read_message_id sütünuna payload adlı nesneden gelen last_read_message_id idsini veriyoruz 
     db.commit()
     return {"ok": True, "last_read_message_id": payload.last_read_message_id} #veritabanına commitleyip geriye id yi döndürüyoruz.
+
+
+

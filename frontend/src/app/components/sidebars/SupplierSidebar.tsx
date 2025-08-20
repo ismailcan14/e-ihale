@@ -6,6 +6,8 @@ import { useState } from "react";
 
 const menuItems = [
   { path: "/supplier", label: "Profilim", roles: ["admin", "müdür", "personel"] },
+      { path: "/supplier/messages", label: "Mesajlar", roles: ["admin", "müdür"] },
+
   {
     label: "İhaleler",
     roles: ["admin", "müdür","personel"],
@@ -15,9 +17,6 @@ const menuItems = [
       { path: "/supplier/auctions/joined", label: "Katıldığım İhaleler", roles: ["admin", "müdür"], key: "finished" },
     ],
   },
-  { path: "/supplier/bid-history", label: "Teklif Geçmişi", roles: ["admin", "müdür", "personel"] },
-  { path: "/supplier/live-bidding", label: "Canlı Teklifler", roles: ["admin", "müdür", "personel"] },
-  { path: "/supplier/reports", label: "Raporlar", roles: ["admin", "müdür"] },
   { path: "/supplier/add-employee", label: "Çalışan Ekle", roles: ["admin"] },
   { path: "/supplier/employees", label: "Çalışanlar", roles: ["admin","müdür","personel"] },
 ];
