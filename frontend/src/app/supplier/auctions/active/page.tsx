@@ -1,21 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { FaGavel } from "react-icons/fa";
 
 export default function ActiveSupplierAuctionsPage() {
   const [activeAuctions, setActiveAuctions] = useState<any[]>([]);
-  const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token"); //tokeni çektik
     if (!token) return;
 
     fetch("http://127.0.0.1:8000/auctions/active", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -25,6 +22,8 @@ export default function ActiveSupplierAuctionsPage() {
       .catch((err) =>
         console.error("Aktif ihaleler alınamadı (supplier):", err)
       );
+
+      //aktif ihaleleri api ile çekiyoruz ve state ile activeAuctions değişkeninde aktif ihale nesnelerini tutuyoruz.
   }, []);
 
   const formatLocalTime = (utcString: string) => {
@@ -32,12 +31,14 @@ export default function ActiveSupplierAuctionsPage() {
     const localDate = new Date(date.getTime() + 3 * 60 * 60 * 1000);
     return localDate.toLocaleString();
   };
+  //saati yerel saat yapma (+3 saat ileri alıyoruz)
 
+  //Eğer aktif ihale yoksa bilgilendirme mesajı varsa tüm ihaleleri map ile kutucuklar halinde sergiliyoruz.
   return (
     <div className="bg-white min-h-screen py-10 px-6">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8 flex items-center justify-center gap-2">
-          <FaGavel className="text-green-600" /> Aktif İhaleler
+          <FaGavel className="text-green-600" /> Aktif İhaleler 
         </h1>
 
         {activeAuctions.length === 0 ? (
@@ -47,8 +48,8 @@ export default function ActiveSupplierAuctionsPage() {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-            >
-              <path
+            > 
+              <path   
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="1.5"
@@ -65,59 +66,58 @@ export default function ActiveSupplierAuctionsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
             {activeAuctions.map((auction) => (
-              <div
+              <Link
                 key={auction.id}
-                className="bg-white border border-gray-200 text-gray-800 rounded-2xl shadow-md p-6 w-full max-w-sm transition-transform transform hover:scale-105 hover:shadow-lg hover:border-green-500"
+                href={`/supplier/auctions/active/detail/${auction.id}`}
+                scroll={false} 
+                className="w-full max-w-sm"
               >
-                <h2
-                  className="text-xl font-bold text-green-700 mb-3 truncate"
-                  title={auction.product?.name || "Belirsiz Ürün"}
-                >
-                  {auction.product?.name || "Belirsiz Ürün"}
-                </h2>
+                <div className="bg-white border border-gray-200 text-gray-800 rounded-2xl shadow-md p-6 w-full transition-transform hover:scale-105 hover:shadow-lg hover:border-green-500 cursor-pointer">
+                  <h2
+                    className="text-xl font-bold text-green-700 mb-3 truncate"
+                    title={auction.product?.name || "Belirsiz Ürün"}
+                  >
+                    {auction.product?.name || "Belirsiz Ürün"}
+                  </h2>
 
-                <div className="space-y-2 text-sm">
-                  <p className="flex items-center">
-                    <span className="font-medium text-gray-600 mr-2 min-w-[90px]">
-                      Başlangıç:
-                    </span>
-                    <span>{formatLocalTime(auction.start_time)}</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="font-medium text-gray-600 mr-2 min-w-[90px]">
-                      Bitiş:
-                    </span>
-                    <span>{formatLocalTime(auction.end_time)}</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="font-medium text-gray-600 mr-2 min-w-[90px]">
-                      Fiyat:
-                    </span>
-                    <span className="text-base font-bold text-green-600">
-                      {auction.current_price || auction.starting_price} ₺
-                    </span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="font-medium text-gray-600 mr-2 min-w-[90px]">
-                      Tip:
-                    </span>
-                    <span>
-                      {auction.auction_type === "highest"
-                        ? "En Yüksek Teklif"
-                        : "En Düşük Teklif"}
-                    </span>
-                  </p>
+                  <div className="space-y-2 text-sm">
+                    <p className="flex items-center">
+                      <span className="font-medium text-gray-600 mr-2 min-w-[90px]">
+                        Başlangıç:
+                      </span>
+                      <span>{formatLocalTime(auction.start_time)}</span>
+                    </p>
+                    <p className="flex items-center">
+                      <span className="font-medium text-gray-600 mr-2 min-w-[90px]">
+                        Bitiş:
+                      </span>
+                      <span>{formatLocalTime(auction.end_time)}</span>
+                    </p>
+                    <p className="flex items-center">
+                      <span className="font-medium text-gray-600 mr-2 min-w-[90px]">
+                        Fiyat:
+                      </span>
+                      <span className="text-base font-bold text-green-600">
+                        {auction.current_price || auction.starting_price} ₺
+                      </span>
+                    </p>
+                    <p className="flex items-center">
+                      <span className="font-medium text-gray-600 mr-2 min-w-[90px]">
+                        Tip:
+                      </span>
+                      <span>
+                        {auction.auction_type === "highest"
+                          ? "En Yüksek Teklif"
+                          : "En Düşük Teklif"}
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="mt-3 text-xs text-gray-500">
+                    Detay için karta tıklayın
+                  </div>
                 </div>
-
-                <button
-                  onClick={() =>
-                    router.push(`/supplier/auctions/active/detail/${auction.id}`)
-                  }
-                  className="mt-5 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-                >
-                  Detaya Git
-                </button>
-              </div>
+              </Link>
             ))}
           </div>
         )}
