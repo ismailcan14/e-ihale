@@ -158,7 +158,7 @@ export default function UpdateEmployeePage() {
         onChange={handleChange}
         className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
         required
-        disabled={Number(formData.role_id) === 1} // Admin ise değiştirilemez
+        disabled={Number(formData.role_id) === 1}
       >
         {Number(formData.role_id) === 1 ? (
           <option value="1">Admin</option>

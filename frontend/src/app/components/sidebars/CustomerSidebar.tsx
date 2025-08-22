@@ -18,7 +18,7 @@ const menuItems = [
     { path: "/customer/auctions/finished", label: "Bitmiş", roles: ["admin", "müdür", "personel"], key: "finished" },
   ],
 },
-  { path: "/customer/create-product", label: "Ürün ve Hizmet Ekleme", roles: ["admin","müdür","personel"] },
+  { path: "/customer/create-product", label: "Ürün ve Hizmet Ekleme", roles: ["admin","müdür","personel"], hardNav: true },
   { path: "/customer/products-services", label: "Ürün Ve Hizmetlerim", roles: ["admin", "müdür","personel"] },
   { path: "/customer/add-employee", label: "Çalışan Ekle", roles: ["admin"] }, 
   { path: "/customer/employees", label: "Çalışanlar", roles: ["admin","müdür","personel"] }, 

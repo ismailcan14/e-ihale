@@ -77,7 +77,7 @@ export default function CustomerInboxPage() {
           {list.map((c) => (
             <Link
               key={c.id}
-              href={`/customer/conversations/${c.id}`}
+              href={`/customer/messages/conversations/${c.id}`}
               className="flex items-center justify-between p-4 hover:bg-gray-50"
             >
               <div className="min-w-0">

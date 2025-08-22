@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import ChatWidget from "../../../components/ChatWidget";
-import { API_BASE, authHeaders } from "../../../components/api";
+import ChatWidget from "../../../../../components/ChatWidget";
+import { API_BASE, authHeaders } from "../../../../../components/api";
 
 type User = { id: number; name?: string; email?: string; company_id?: number };
 type Conversation = {

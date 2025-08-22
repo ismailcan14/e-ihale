@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function MyProductsPage() {
@@ -112,6 +113,10 @@ export default function MyProductsPage() {
             </div>
           )}
         </section>
+         <Link
+              href={`/customer/create-product`}
+              className="flex items-center justify-between p-4 text-gray-600 hover:bg-red-500"
+            >Ürün Ekleme</Link>
       </div>
     </div>
   );
